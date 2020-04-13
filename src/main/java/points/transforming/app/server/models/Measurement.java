@@ -2,8 +2,8 @@ package points.transforming.app.server.models;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 public class Measurement {
@@ -15,27 +15,8 @@ public class Measurement {
     private LocalDateTime endDate;
     private String place;
 
-    @ManyToMany(cascade = {
-            CascadeType.PERSIST,
-            CascadeType.MERGE
-    })
-    @JoinTable(
-            name = "measurements_points",
-            joinColumns = @JoinColumn(name = "measurement_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "point_id", referencedColumnName = "id")
-    )
-    @OrderColumn(name = "order_adding_points")
-    private Set<Point> points;
-
-    public void addPoint(Point point) {
-        points.add(point);
-        point.getMeasurements().add(this);
-    }
-
-    public void removePoint(Point point) {
-        points.remove(point);
-        point.getMeasurements().remove(this);
-    }
+    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY, mappedBy = "measurement")
+    private List<Picket> pickets;
 
     public int getId() {
         return id;
@@ -77,12 +58,12 @@ public class Measurement {
         this.place = place;
     }
 
-    public void setPoints(Set<Point> points) {
-        this.points = points;
+    public void setPickets(List<Picket> pickets) {
+        this.pickets = pickets;
     }
 
-    public Set<Point> getPoints() {
-        return this.points;
+    public List<Picket> getPickets() {
+        return this.pickets;
     }
 
     @Override
