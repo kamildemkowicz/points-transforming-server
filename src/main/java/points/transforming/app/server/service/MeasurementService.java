@@ -16,12 +16,10 @@ public class MeasurementService {
     }
 
     public List<MeasurementRead> getAllMeasurement() {
-        List<MeasurementRead> m = this.measurementRepository
+        return this.measurementRepository
                 .findAll()
                 .stream()
                 .map(MeasurementRead::new)
                 .collect(Collectors.toList());
-
-        return m;
     }
 }

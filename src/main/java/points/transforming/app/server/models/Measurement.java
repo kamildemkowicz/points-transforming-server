@@ -3,6 +3,7 @@ package points.transforming.app.server.models;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 public class Measurement {
@@ -13,6 +14,28 @@ public class Measurement {
     private LocalDateTime creationDate;
     private LocalDateTime endDate;
     private String place;
+
+    @ManyToMany(cascade = {
+            CascadeType.PERSIST,
+            CascadeType.MERGE
+    })
+    @JoinTable(
+            name = "measurements_points",
+            joinColumns = @JoinColumn(name = "measurement_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "point_id", referencedColumnName = "id")
+    )
+    @OrderColumn(name = "order_adding_points")
+    private Set<Point> points;
+
+    public void addPoint(Point point) {
+        points.add(point);
+        point.getMeasurements().add(this);
+    }
+
+    public void removePoint(Point point) {
+        points.remove(point);
+        point.getMeasurements().remove(this);
+    }
 
     public int getId() {
         return id;
@@ -52,6 +75,14 @@ public class Measurement {
 
     public void setPlace(String place) {
         this.place = place;
+    }
+
+    public void setPoints(Set<Point> points) {
+        this.points = points;
+    }
+
+    public Set<Point> getPoints() {
+        return this.points;
     }
 
     @Override
