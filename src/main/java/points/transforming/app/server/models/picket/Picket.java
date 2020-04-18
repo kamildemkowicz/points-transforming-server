@@ -1,4 +1,6 @@
-package points.transforming.app.server.models;
+package points.transforming.app.server.models.picket;
+
+import points.transforming.app.server.models.measurement.Measurement;
 
 import javax.persistence.*;
 import java.util.Objects;

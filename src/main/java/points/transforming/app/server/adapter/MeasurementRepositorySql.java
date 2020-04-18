@@ -3,7 +3,7 @@ package points.transforming.app.server.adapter;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import points.transforming.app.server.models.Measurement;
+import points.transforming.app.server.models.measurement.Measurement;
 import points.transforming.app.server.repositories.MeasurementRepository;
 
 import java.util.List;

@@ -1,18 +1,21 @@
-package points.transforming.app.server.models;
+package points.transforming.app.server.models.measurement;
+
+import points.transforming.app.server.models.picket.Picket;
+import points.transforming.app.server.models.picket.PicketReadModel;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MeasurementRead {
+public class MeasurementReadModel {
     private final int id;
     private final String name;
     private final String place;
     private final LocalDateTime creationDate;
-    private final List<PicketRead> pickets;
+    private final List<PicketReadModel> pickets;
 
-    public MeasurementRead(Measurement measurement) {
+    public MeasurementReadModel(Measurement measurement) {
         this.id = measurement.getId();
         this.name = measurement.getName();
         this.place = measurement.getName();
@@ -20,7 +23,7 @@ public class MeasurementRead {
         this.pickets = measurement
                 .getPickets()
                 .stream()
-                .map(PicketRead::new)
+                .map(PicketReadModel::new)
                 .collect(Collectors.toList());
     }
 
@@ -40,7 +43,7 @@ public class MeasurementRead {
         return creationDate;
     }
 
-    public List<PicketRead> getPickets() {
+    public List<PicketReadModel> getPickets() {
         return pickets;
     }
 

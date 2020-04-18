@@ -2,7 +2,7 @@ package points.transforming.app.server.repositories;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import points.transforming.app.server.models.Measurement;
+import points.transforming.app.server.models.measurement.Measurement;
 import java.util.List;
 import java.util.Optional;
 

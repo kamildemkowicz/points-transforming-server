@@ -1,4 +1,6 @@
-package points.transforming.app.server.models;
+package points.transforming.app.server.models.measurement;
+
+import points.transforming.app.server.models.picket.Picket;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -60,6 +62,10 @@ public class Measurement {
 
     public List<Picket> getPickets() {
         return this.pickets;
+    }
+
+    public void setPickets(List<Picket> pickets) {
+        this.pickets = pickets;
     }
 
     @Override

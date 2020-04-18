@@ -1,13 +1,13 @@
-package points.transforming.app.server.models;
+package points.transforming.app.server.models.picket;
 
-public class PicketRead {
+public class PicketReadModel {
     private final int id;
 
     private final String picketId;
     private final double coordinateX;
     private final double coordinateY;
 
-    public PicketRead(Picket picket) {
+    public PicketReadModel(Picket picket) {
         this.id = picket.getId();
         this.picketId = picket.getPicketId();
         this.coordinateX = picket.getCoordinateX();
