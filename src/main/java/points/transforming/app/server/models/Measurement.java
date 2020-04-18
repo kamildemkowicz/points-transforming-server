@@ -15,7 +15,7 @@ public class Measurement {
     private LocalDateTime endDate;
     private String place;
 
-    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY, mappedBy = "measurement")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "measurement")
     private List<Picket> pickets;
 
     public int getId() {
@@ -56,10 +56,6 @@ public class Measurement {
 
     public void setPlace(String place) {
         this.place = place;
-    }
-
-    public void setPickets(List<Picket> pickets) {
-        this.pickets = pickets;
     }
 
     public List<Picket> getPickets() {
