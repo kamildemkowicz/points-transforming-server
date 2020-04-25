@@ -1,4 +1,4 @@
-package points.transforming.app.server.adapter;
+package points.transforming.app.server.adapters;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -18,7 +18,7 @@ public class MeasurementReadModel {
     public MeasurementReadModel(Measurement measurement) {
         this.id = measurement.getId();
         this.name = measurement.getName();
-        this.place = measurement.getName();
+        this.place = measurement.getPlace();
         this.creationDate = measurement.getCreationDate();
         this.pickets = measurement
                 .getPickets()
