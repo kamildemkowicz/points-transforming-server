@@ -3,6 +3,7 @@ package points.transforming.app.server.models.measurement;
 import points.transforming.app.server.models.picket.Picket;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -12,9 +13,11 @@ public class Measurement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private int id;
+    @NotNull
     private String name;
     private LocalDateTime creationDate;
     private LocalDateTime endDate;
+    @NotNull
     private String place;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "measurement")
@@ -66,6 +69,11 @@ public class Measurement {
 
     public void setPickets(List<Picket> pickets) {
         this.pickets = pickets;
+    }
+
+    @PrePersist
+    private void setCreationDate() {
+        this.setCreationDate(LocalDateTime.now());
     }
 
     @Override

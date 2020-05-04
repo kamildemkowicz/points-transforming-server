@@ -1,4 +1,4 @@
-package points.transforming.app.server.service;
+package points.transforming.app.server.services;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

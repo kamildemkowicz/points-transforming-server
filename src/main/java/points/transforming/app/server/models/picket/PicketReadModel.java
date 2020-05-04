@@ -1,11 +1,12 @@
 package points.transforming.app.server.models.picket;
 
 public class PicketReadModel {
-    private final int id;
+    private int id;
+    private String picketId;
+    private double coordinateX;
+    private double coordinateY;
 
-    private final String picketId;
-    private final double coordinateX;
-    private final double coordinateY;
+    public PicketReadModel() {}
 
     public PicketReadModel(Picket picket) {
         this.id = picket.getId();

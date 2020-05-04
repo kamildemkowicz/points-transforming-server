@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import points.transforming.app.server.models.measurement.MeasurementReadModel;
 import points.transforming.app.server.models.measurement.MeasurementWriteModel;
-import points.transforming.app.server.service.MeasurementService;
+import points.transforming.app.server.services.MeasurementService;
 
 import javax.validation.Valid;
 import java.net.URI;

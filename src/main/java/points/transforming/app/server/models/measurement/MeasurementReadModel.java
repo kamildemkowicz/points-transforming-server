@@ -9,11 +9,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class MeasurementReadModel {
-    private final int id;
-    private final String name;
-    private final String place;
-    private final LocalDateTime creationDate;
-    private final List<PicketReadModel> pickets;
+    private int id;
+    private String name;
+    private String place;
+    private LocalDateTime creationDate;
+    private List<PicketReadModel> pickets;
+
+    public MeasurementReadModel() {}
 
     public MeasurementReadModel(Measurement measurement) {
         this.id = measurement.getId();
