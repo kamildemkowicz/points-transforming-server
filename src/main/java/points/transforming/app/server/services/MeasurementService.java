@@ -2,6 +2,7 @@ package points.transforming.app.server.services;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import points.transforming.app.server.exceptions.MeasurementBadRequestException;
 import points.transforming.app.server.exceptions.MeasurementNotFoundException;
 import points.transforming.app.server.models.measurement.Measurement;
 import points.transforming.app.server.models.measurement.MeasurementReadModel;
@@ -45,7 +46,10 @@ public class MeasurementService {
     }
 
     public MeasurementReadModel createMeasurement(MeasurementWriteModel measurementWriteModel) {
-        Measurement measurement = this.measurementRepository.save(measurementWriteModel.toMeasurement());
-        return new MeasurementReadModel(measurement);
+        try {
+            return new MeasurementReadModel(this.measurementRepository.save(measurementWriteModel.toMeasurement()));
+        } catch (RuntimeException e) {
+            throw new MeasurementBadRequestException();
+        }
     }
 }
