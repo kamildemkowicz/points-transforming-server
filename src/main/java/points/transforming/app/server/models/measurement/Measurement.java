@@ -1,5 +1,6 @@
 package points.transforming.app.server.models.measurement;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import points.transforming.app.server.models.picket.Picket;
 
 import javax.persistence.*;
@@ -15,7 +16,9 @@ public class Measurement {
     private int id;
     @NotNull
     private String name;
+    @DateTimeFormat(pattern = "yyyy-MM-ddTHH:mm:ss")
     private LocalDateTime creationDate;
+    @DateTimeFormat(pattern = "yyyy-MM-ddTHH:mm:ss")
     private LocalDateTime endDate;
     @NotNull
     private String place;

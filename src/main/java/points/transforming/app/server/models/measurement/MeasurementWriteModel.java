@@ -41,6 +41,7 @@ public class MeasurementWriteModel {
 
     public Measurement toMeasurement() {
         var result = new Measurement();
+        pickets.forEach(picketWriteModel -> picketWriteModel.setMeasurement(result));
         result.setName(name);
         result.setPlace(place);
         result.setPickets(pickets

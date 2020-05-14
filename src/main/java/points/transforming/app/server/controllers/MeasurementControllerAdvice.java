@@ -3,8 +3,12 @@ package points.transforming.app.server.controllers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import points.transforming.app.server.exceptions.MeasurementBadRequestException;
 import points.transforming.app.server.exceptions.MeasurementNotFoundException;
+import points.transforming.app.server.exceptions.report.ViolationReport;
+
+import javax.validation.ConstraintViolationException;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestControllerAdvice(annotations = MeasurementExceptionProcessing.class)
 public class MeasurementControllerAdvice {
@@ -13,8 +17,20 @@ public class MeasurementControllerAdvice {
         return ResponseEntity.notFound().build();
     }
 
-    @ExceptionHandler(MeasurementBadRequestException.class)
-    ResponseEntity<String> handleCreateMeasurementBadRequestException(MeasurementBadRequestException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
+    @ExceptionHandler(ConstraintViolationException.class)
+    ResponseEntity<List<ViolationReport>> handleCreateMeasurementBadRequestException(ConstraintViolationException e) {
+        var reports = new ArrayList<ViolationReport>();
+        e.getConstraintViolations().forEach((constraintViolation -> {
+                    var report = new ViolationReport(
+                    constraintViolation.getPropertyPath().toString(),
+                    constraintViolation.getMessage(),
+                    constraintViolation.getInvalidValue() == null ? "null" : constraintViolation.getInvalidValue().toString()
+                    );
+
+            reports.add(report);
+        })
+        );
+
+        return ResponseEntity.badRequest().body(reports);
     }
 }
