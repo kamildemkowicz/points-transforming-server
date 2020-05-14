@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 public class MeasurementWriteModel {
     private String name;
     private String place;
+    private String owner;
     private List<PicketWriteModel> pickets = new ArrayList<>();
 
     public MeasurementWriteModel() {
@@ -39,11 +40,20 @@ public class MeasurementWriteModel {
         this.pickets = pickets;
     }
 
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
     public Measurement toMeasurement() {
         var result = new Measurement();
         pickets.forEach(picketWriteModel -> picketWriteModel.setMeasurement(result));
         result.setName(name);
         result.setPlace(place);
+        result.setOwner(owner);
         result.setPickets(pickets
                 .stream()
                 .map(PicketWriteModel::toPicket)

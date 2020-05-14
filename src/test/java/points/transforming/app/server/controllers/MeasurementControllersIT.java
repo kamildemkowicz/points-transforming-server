@@ -8,12 +8,12 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import points.transforming.app.server.exceptions.report.ViolationReport;
-import points.transforming.app.server.models.measurement.Measurement;
 import points.transforming.app.server.models.measurement.MeasurementReadModel;
 import points.transforming.app.server.models.measurement.MeasurementWriteModel;
 import points.transforming.app.server.models.picket.PicketWriteModel;
 import points.transforming.app.server.repositories.MeasurementRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -96,6 +96,7 @@ public class MeasurementControllersIT {
         var measurementWriteModel = new MeasurementWriteModel();
         measurementWriteModel.setName("testPlace");
         measurementWriteModel.setPlace("Gdansk");
+        measurementWriteModel.setOwner("Kamil Demkowicz");
 
         // when
         ResponseEntity<MeasurementReadModel> result= this.testRestTemplate
@@ -109,7 +110,7 @@ public class MeasurementControllersIT {
     }
 
     @Test
-    public void httpPost_createMeasurementWithoutPlace_throwException() {
+    public void httpPost_createMeasurementWithoutPlaceAndOwner_throwException() {
         // given
         var measurementWriteModel = new MeasurementWriteModel();
         measurementWriteModel.setName("testPlace");
@@ -123,14 +124,14 @@ public class MeasurementControllersIT {
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(Objects.requireNonNull(result.getBody()).length).isEqualTo(1);
+        assertThat(Objects.requireNonNull(result.getBody()).length).isEqualTo(2);
         assertThat(Objects.requireNonNull(result.getBody()[0].getCause())).isEqualTo("place");
         assertThat(Objects.requireNonNull(result.getBody()[0].getMessage())).isEqualTo("must not be null");
         assertThat(Objects.requireNonNull(result.getBody()[0].getField())).isEqualTo("null");
     }
 
     @Test
-    public void httpPost_createMeasurementWithoutPlaceAndName_throwExceptions() {
+    public void httpPost_createMeasurementWithoutPlaceAndNameAndOwner_throwExceptions() {
         // given
         var measurementWriteModel = new MeasurementWriteModel();
 
@@ -143,12 +144,13 @@ public class MeasurementControllersIT {
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(Objects.requireNonNull(result.getBody()).length).isEqualTo(2);
+        assertThat(Objects.requireNonNull(result.getBody()).length).isEqualTo(3);
     }
 
     @Test
     public void httpPost_createMeasurementWithPickets() {
         // given
+        var time = LocalDateTime.now();
         var picket1 = new PicketWriteModel();
         picket1.setPicketId("picket1");
         picket1.setCoordinateX(40.30);
@@ -162,6 +164,7 @@ public class MeasurementControllersIT {
         var measurementWriteModel = new MeasurementWriteModel();
         measurementWriteModel.setName("testPlace2");
         measurementWriteModel.setPlace("Gdansk");
+        measurementWriteModel.setOwner("Kamil Demkowicz");
         measurementWriteModel.setPickets(List.of(picket1, picket2));
 
         // when
@@ -173,5 +176,10 @@ public class MeasurementControllersIT {
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(Objects.requireNonNull(result.getBody()).getPickets().size()).isEqualTo(2);
+        assertThat(result.getBody().getPlace()).isEqualTo("Gdansk");
+        assertThat(result.getBody().getName()).isEqualTo("testPlace2");
+        assertThat(result.getBody().getOwner()).isEqualTo("Kamil Demkowicz");
+        assertThat(result.getBody().getCreationDate()).isNotNull().isAfter(time);
     }
 }

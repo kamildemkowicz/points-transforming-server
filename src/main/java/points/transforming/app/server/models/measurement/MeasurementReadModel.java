@@ -1,10 +1,8 @@
 package points.transforming.app.server.models.measurement;
 
-import points.transforming.app.server.models.picket.Picket;
 import points.transforming.app.server.models.picket.PicketReadModel;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,6 +10,7 @@ public class MeasurementReadModel {
     private int id;
     private String name;
     private String place;
+    private String owner;
     private LocalDateTime creationDate;
     private List<PicketReadModel> pickets;
 
@@ -21,6 +20,7 @@ public class MeasurementReadModel {
         this.id = measurement.getId();
         this.name = measurement.getName();
         this.place = measurement.getPlace();
+        this.owner = measurement.getOwner();
         this.creationDate = measurement.getCreationDate();
         this.pickets = measurement
                 .getPickets()
@@ -49,7 +49,7 @@ public class MeasurementReadModel {
         return pickets;
     }
 
-    private List<Picket> createPicketsList(List<Picket> pickets) {
-        return new ArrayList<>(pickets);
+    public String getOwner() {
+        return owner;
     }
 }

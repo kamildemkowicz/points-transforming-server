@@ -22,6 +22,8 @@ public class Measurement {
     private LocalDateTime endDate;
     @NotNull
     private String place;
+    @NotNull
+    private String owner;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "measurement")
     private List<Picket> pickets;
@@ -74,6 +76,14 @@ public class Measurement {
         this.pickets = pickets;
     }
 
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
     @PrePersist
     private void setCreationDate() {
         this.setCreationDate(LocalDateTime.now());
@@ -88,11 +98,13 @@ public class Measurement {
                 getName().equals(that.getName()) &&
                 getCreationDate().equals(that.getCreationDate()) &&
                 Objects.equals(getEndDate(), that.getEndDate()) &&
-                getPlace().equals(that.getPlace());
+                getPlace().equals(that.getPlace()) &&
+                getOwner().equals(that.getOwner()) &&
+                Objects.equals(getPickets(), that.getPickets());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getName(), getCreationDate(), getEndDate(), getPlace());
+        return Objects.hash(getId(), getName(), getCreationDate(), getEndDate(), getPlace(), getOwner(), getPickets());
     }
 }
