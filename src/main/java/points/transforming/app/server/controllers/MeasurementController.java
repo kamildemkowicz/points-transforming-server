@@ -46,4 +46,13 @@ public class MeasurementController {
                 .created(URI.create("/" + result.getId()))
                 .body(result);
     }
+
+    @PostMapping(value = "/{id}")
+    public ResponseEntity<MeasurementReadModel> updateMeasurement(@PathVariable int id, @RequestBody @Valid MeasurementWriteModel measurementWriteModel) {
+        var result = measurementService.updateMeasurement(id, measurementWriteModel);
+
+        return ResponseEntity
+                .created(URI.create("/" + result.getId()))
+                .body(result);
+    }
 }

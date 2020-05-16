@@ -3,17 +3,18 @@ package points.transforming.app.server.models.picket;
 import points.transforming.app.server.models.measurement.Measurement;
 
 public class PicketWriteModel {
-    private String picketId;
+    private String name;
     private double coordinateX;
     private double coordinateY;
     private Measurement measurement;
+    private String picketInternalId;
 
-    public String getPicketId() {
-        return picketId;
+    public String getName() {
+        return name;
     }
 
-    public void setPicketId(String picketId) {
-        this.picketId = picketId;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public double getCoordinateX() {
@@ -40,12 +41,21 @@ public class PicketWriteModel {
         this.measurement = measurement;
     }
 
+    public String getPicketInternalId() {
+        return this.picketInternalId;
+    }
+
+    public void setPicketInternalId(String picketInternalId) {
+        this.picketInternalId = picketInternalId;
+    }
+
     public Picket toPicket() {
         var picket = new Picket();
-        picket.setPicketId(picketId);
+        picket.setName(name);
         picket.setCoordinateX(coordinateX);
         picket.setCoordinateY(coordinateY);
         picket.setMeasurement(measurement);
+        picket.setPicketInternalId(picketInternalId);
 
         return picket;
     }

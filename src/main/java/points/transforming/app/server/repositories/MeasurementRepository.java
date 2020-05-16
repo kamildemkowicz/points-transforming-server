@@ -14,4 +14,6 @@ public interface MeasurementRepository  {
     Optional<Measurement> findById(Integer id);
 
     Measurement save(Measurement measurement);
+
+    int getHighestInternalId();
 }

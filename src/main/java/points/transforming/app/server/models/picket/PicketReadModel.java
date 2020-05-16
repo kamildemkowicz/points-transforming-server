@@ -2,7 +2,8 @@ package points.transforming.app.server.models.picket;
 
 public class PicketReadModel {
     private int id;
-    private String picketId;
+    private String picketInternalId;
+    private String name;
     private double coordinateX;
     private double coordinateY;
 
@@ -10,17 +11,18 @@ public class PicketReadModel {
 
     public PicketReadModel(Picket picket) {
         this.id = picket.getId();
-        this.picketId = picket.getPicketId();
+        this.name = picket.getName();
         this.coordinateX = picket.getCoordinateX();
         this.coordinateY = picket.getCoordinateY();
+        this.picketInternalId = picket.getPicketInternalId();
     }
 
     public int getId() {
         return id;
     }
 
-    public String getPicketId() {
-        return picketId;
+    public String getName() {
+        return name;
     }
 
     public double getCoordinateX() {
@@ -29,5 +31,9 @@ public class PicketReadModel {
 
     public double getCoordinateY() {
         return coordinateY;
+    }
+
+    public String getPicketInternalId() {
+        return this.picketInternalId;
     }
 }

@@ -1,5 +1,6 @@
 package points.transforming.app.server.controllers;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -32,5 +33,16 @@ public class MeasurementControllerAdvice {
         );
 
         return ResponseEntity.badRequest().body(reports);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    ResponseEntity<ViolationReport> handleDuplicateMeasurementCreationException(DataIntegrityViolationException e) {
+        var report = new ViolationReport(
+                e.getCause().getCause().getMessage(),
+                "The measurement with given payload already exists!",
+                null
+        );
+
+        return ResponseEntity.badRequest().body(report);
     }
 }

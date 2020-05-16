@@ -3,6 +3,7 @@ package points.transforming.app.server.models.picket;
 import points.transforming.app.server.models.measurement.Measurement;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @Entity
@@ -10,9 +11,13 @@ public class Picket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
-    private String picketId;
+    @NotNull
+    private String picketInternalId;
+    @NotNull
+    private String name;
+    @NotNull
     private double coordinateX;
+    @NotNull
     private double coordinateY;
 
     @ManyToOne
@@ -25,6 +30,14 @@ public class Picket {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getPicketInternalId() {
+        return picketInternalId;
+    }
+
+    public void setPicketInternalId(String picketInternalId) {
+        this.picketInternalId = picketInternalId;
     }
 
     public double getCoordinateX() {
@@ -43,12 +56,12 @@ public class Picket {
         this.coordinateY = coordinateY;
     }
 
-    public String getPicketId() {
-        return picketId;
+    public String getName() {
+        return name;
     }
 
-    public void setPicketId(String picketNumber) {
-        this.picketId = picketNumber;
+    public void setName(String picketNumber) {
+        this.name = picketNumber;
     }
 
     public Measurement getMeasurement() {
@@ -67,12 +80,13 @@ public class Picket {
         return getId() == picket.getId() &&
                 Double.compare(picket.getCoordinateX(), getCoordinateX()) == 0 &&
                 Double.compare(picket.getCoordinateY(), getCoordinateY()) == 0 &&
-                Objects.equals(getPicketId(), picket.getPicketId()) &&
+                getPicketInternalId().equals(picket.getPicketInternalId()) &&
+                getName().equals(picket.getName()) &&
                 getMeasurement().equals(picket.getMeasurement());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getPicketId(), getCoordinateX(), getCoordinateY(), getMeasurement());
+        return Objects.hash(getId(), getPicketInternalId(), getName(), getCoordinateX(), getCoordinateY(), getMeasurement());
     }
 }

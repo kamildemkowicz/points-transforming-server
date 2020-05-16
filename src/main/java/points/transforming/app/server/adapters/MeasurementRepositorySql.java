@@ -13,4 +13,8 @@ public interface MeasurementRepositorySql extends MeasurementRepository, JpaRepo
     @Override
     @Query("select distinct m from Measurement m left join fetch m.pickets")
     List<Measurement> findAll();
+
+    @Override
+    @Query(nativeQuery = true, value = "select max(CAST(REPLACE(measurement_internal_id, \"MES-\", \"\") AS SIGNED)) from measurement")
+    int getHighestInternalId();
 }
