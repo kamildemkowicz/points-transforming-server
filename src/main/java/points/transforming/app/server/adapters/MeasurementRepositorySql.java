@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface MeasurementRepositorySql extends MeasurementRepository, JpaRepository<Measurement, Integer> {
     @Override
-    @Query("select distinct m from Measurement m left join fetch m.pickets")
+    @Query("select distinct m from Measurement m left join fetch m.pickets WHERE m.endDate=null ORDER BY m.creationDate DESC")
     List<Measurement> findAll();
 
     @Override
