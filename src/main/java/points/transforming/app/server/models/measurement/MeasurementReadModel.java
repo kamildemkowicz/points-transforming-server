@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 public class MeasurementReadModel {
     private int id;
     private String name;
+    private String measurementInternalId;
     private String place;
     private String owner;
     private LocalDateTime creationDate;
@@ -19,6 +20,7 @@ public class MeasurementReadModel {
     public MeasurementReadModel(Measurement measurement) {
         this.id = measurement.getId();
         this.name = measurement.getName();
+        this.measurementInternalId = measurement.getMeasurementInternalId();
         this.place = measurement.getPlace();
         this.owner = measurement.getOwner();
         this.creationDate = measurement.getCreationDate();
@@ -51,5 +53,9 @@ public class MeasurementReadModel {
 
     public String getOwner() {
         return owner;
+    }
+
+    public String getMeasurementInternalId() {
+        return measurementInternalId;
     }
 }

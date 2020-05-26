@@ -43,8 +43,8 @@ public class MeasurementService {
                 .collect(Collectors.toList());
     }
 
-    public MeasurementReadModel getMeasurement(int id) {
-        return new MeasurementReadModel(this.findMeasurementById(id));
+    public MeasurementReadModel getMeasurement(String measurementInternalId) {
+        return new MeasurementReadModel(this.findMeasurementByInternalId(measurementInternalId));
     }
 
     public MeasurementReadModel createMeasurement(MeasurementWriteModel measurementWriteModel) {
@@ -60,11 +60,11 @@ public class MeasurementService {
         return new MeasurementReadModel(this.measurementRepository.save(measurement));
     }
 
-    public MeasurementReadModel updateMeasurement(int measurementId, MeasurementWriteModel newMeasurement) {
+    public MeasurementReadModel updateMeasurement(String internalMeasurementId, MeasurementWriteModel newMeasurement) {
         // TODO it will be fixed after authentication will be added
         Optional<User> user = userRepository.findById(1);
 
-        Measurement oldMeasurement = this.findMeasurementById(measurementId);
+        Measurement oldMeasurement = this.findMeasurementByInternalId(internalMeasurementId);
         Measurement measurement = newMeasurement.toMeasurement(user.get());
 
         measurement.setVersion(oldMeasurement.getVersion() + 1);
@@ -79,9 +79,9 @@ public class MeasurementService {
         return new MeasurementReadModel(newMeasurementCreated);
     }
 
-    private Measurement findMeasurementById(int id) {
+    private Measurement findMeasurementByInternalId(String internalId) {
         return this.measurementRepository
-                .findById(id)
-                .orElseThrow(() -> new MeasurementNotFoundException(id));
+                .findByMeasurementInternalIdAndEndDate(internalId, null)
+                .orElseThrow(() -> new MeasurementNotFoundException(internalId));
     }
 }

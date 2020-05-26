@@ -34,9 +34,9 @@ public class MeasurementController {
         return ResponseEntity.ok().body(this.measurementService.getAllMeasurement(page));
     }
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<MeasurementReadModel> getMeasurement(@PathVariable int id) {
-        return ResponseEntity.ok().body(this.measurementService.getMeasurement(id));
+    @GetMapping(value = "/{measurementInternalId}")
+    public ResponseEntity<MeasurementReadModel> getMeasurement(@PathVariable String measurementInternalId) {
+        return ResponseEntity.ok().body(this.measurementService.getMeasurement(measurementInternalId));
     }
 
     @PostMapping
@@ -47,9 +47,9 @@ public class MeasurementController {
                 .body(result);
     }
 
-    @PostMapping(value = "/{id}")
-    public ResponseEntity<MeasurementReadModel> updateMeasurement(@PathVariable int id, @RequestBody @Valid MeasurementWriteModel measurementWriteModel) {
-        var result = measurementService.updateMeasurement(id, measurementWriteModel);
+    @PostMapping(value = "/{internalMeasurementId}")
+    public ResponseEntity<MeasurementReadModel> updateMeasurement(@PathVariable String internalMeasurementId, @RequestBody @Valid MeasurementWriteModel measurementWriteModel) {
+        var result = measurementService.updateMeasurement(internalMeasurementId, measurementWriteModel);
 
         return ResponseEntity
                 .created(URI.create("/" + result.getId()))

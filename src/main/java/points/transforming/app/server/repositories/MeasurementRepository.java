@@ -15,6 +15,7 @@ public interface MeasurementRepository  {
     Page<Measurement> findAll(Pageable page);
 
     Optional<Measurement> findById(Integer id);
+    Optional<Measurement> findByMeasurementInternalIdAndEndDate(String id, LocalDateTime endDate);
 
     Measurement save(Measurement measurement);
 

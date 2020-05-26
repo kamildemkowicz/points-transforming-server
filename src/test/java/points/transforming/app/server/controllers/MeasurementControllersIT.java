@@ -295,7 +295,7 @@ public class MeasurementControllersIT {
 
         // when
         ResponseEntity<MeasurementReadModel> result2 = this.testRestTemplate
-                .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getId(),
+                .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getMeasurementInternalId(),
                         this.createNewMeasurementRequestBody(measurementName, List.of(picket1_2, picket2_2)),
                         MeasurementReadModel.class
         );
@@ -339,7 +339,7 @@ public class MeasurementControllersIT {
 
         // when
         ResponseEntity<MeasurementReadModel> result2 = this.testRestTemplate
-                .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getId(),
+                .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getMeasurementInternalId(),
                         measurementRequestBody,
                         MeasurementReadModel.class
                 );
@@ -382,7 +382,7 @@ public class MeasurementControllersIT {
 
         // when
         ResponseEntity<MeasurementReadModel> result2 = this.testRestTemplate
-                .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getId(),
+                .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getMeasurementInternalId(),
                         this.createNewMeasurementRequestBody(measurementName, List.of(picketWriteModel)),
                         MeasurementReadModel.class
                 );
@@ -438,7 +438,7 @@ public class MeasurementControllersIT {
 
         // when
         ResponseEntity<MeasurementReadModel> result2 = this.testRestTemplate
-                .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getId(),
+                .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getMeasurementInternalId(),
                         this.createNewMeasurementRequestBody(measurementName, List.of(picketWriteModel1, picketWriteModel2, picketWriteModel)),
                         MeasurementReadModel.class
                 );
@@ -501,7 +501,7 @@ public class MeasurementControllersIT {
 
         // when
         ResponseEntity<MeasurementReadModel> result2 = this.testRestTemplate
-                .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getId(),
+                .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getMeasurementInternalId(),
                         this.createNewMeasurementRequestBody(measurementName, List.of(picketWriteModel1, picketWriteModel)),
                         MeasurementReadModel.class
                 );
@@ -564,7 +564,7 @@ public class MeasurementControllersIT {
 
         // when
         ResponseEntity<ViolationReport> result2 = this.testRestTemplate
-                .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getId(),
+                .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getMeasurementInternalId(),
                         this.createNewMeasurementRequestBody(measurementName, List.of(picketWriteModel1, picketWriteModel2, picketWriteModel)),
                         ViolationReport.class
                 );

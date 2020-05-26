@@ -7,6 +7,7 @@ import points.transforming.app.server.models.measurement.Measurement;
 import points.transforming.app.server.repositories.MeasurementRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MeasurementRepositorySql extends MeasurementRepository, JpaRepository<Measurement, Integer> {
