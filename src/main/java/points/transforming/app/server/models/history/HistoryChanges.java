@@ -1,14 +1,12 @@
 package points.transforming.app.server.models.history;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
+import lombok.*;
+
+@Builder
 @Getter
 @Setter
 public class HistoryChanges {
-
+    private List<HistorySimpleChanges> changes;
 }

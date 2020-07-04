@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class PicketService {
-    private PicketRepository picketRepository;
+    private final PicketRepository picketRepository;
 
     public PicketService(PicketRepository picketRepository) {
         this.picketRepository = picketRepository;
