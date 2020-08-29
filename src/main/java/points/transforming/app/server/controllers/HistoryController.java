@@ -11,12 +11,13 @@ import points.transforming.app.server.services.HistoryService;
 
 @RestController
 @AllArgsConstructor
+@MeasurementExceptionProcessing
 @RequestMapping(path = "history")
 public class HistoryController {
     private final HistoryService historyService;
 
     @GetMapping(value = "/{measurementInternalId}")
-    public ResponseEntity<HistoryChanges> getMeasurement(@PathVariable String measurementInternalId) {
+    public ResponseEntity<HistoryChanges> getMeasurement(@PathVariable final String measurementInternalId) {
         return ResponseEntity.ok().body(historyService.getHistoryChanges(measurementInternalId));
     }
 }

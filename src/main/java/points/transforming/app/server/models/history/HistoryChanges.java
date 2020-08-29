@@ -8,5 +8,5 @@ import lombok.*;
 @Getter
 @Setter
 public class HistoryChanges {
-    private List<HistorySimpleChanges> changes;
+    private List<HistoryChange> changes;
 }

@@ -62,16 +62,16 @@ public class MeasurementService {
 
     public MeasurementReadModel updateMeasurement(String internalMeasurementId, MeasurementWriteModel newMeasurement) {
         // TODO it will be fixed after authentication will be added
-        Optional<User> user = userRepository.findById(1);
+        final Optional<User> user = userRepository.findById(1);
 
-        Measurement oldMeasurement = this.findMeasurementByInternalId(internalMeasurementId);
-        Measurement measurement = newMeasurement.toMeasurement(user.get());
+        final Measurement oldMeasurement = this.findMeasurementByInternalId(internalMeasurementId);
+        final Measurement measurement = newMeasurement.toMeasurement(user.get());
 
         measurement.setVersion(oldMeasurement.getVersion() + 1);
         measurement.setMeasurementInternalId(oldMeasurement.getMeasurementInternalId());
         picketService.setInternalIdsForNewPickets(measurement.getPickets());
 
-        Measurement newMeasurementCreated = this.measurementRepository.save(measurement);
+        final Measurement newMeasurementCreated = this.measurementRepository.save(measurement);
         oldMeasurement.setEndDate(newMeasurementCreated.getCreationDate());
 
         this.measurementRepository.save(oldMeasurement);

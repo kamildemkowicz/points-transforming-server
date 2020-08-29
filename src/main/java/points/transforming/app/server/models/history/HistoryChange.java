@@ -1,5 +1,8 @@
 package points.transforming.app.server.models.history;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,8 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class HistoryChange {
-    private String oldValue;
-    private String newValue;
-    private String label;
-    private HistoryChangeType type;
+    private List<HistorySimpleChange> measurementChanges;
+    private List<HistoryPicketChange> picketChanges;
+    private LocalDateTime dateTime;
 }
