@@ -1,9 +1,6 @@
 package points.transforming.app.server.services;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -42,29 +39,26 @@ public class HistoryService {
         final var j = new AtomicInteger(1);
 
         while(j.get() != measurementChanges.size()) {
-            final HistoryChange historyChange = this.createSimpleChanges(measurementChanges.get(i.getAndIncrement()),
-                measurementChanges.get(j.getAndIncrement()));
-
-            if (historyChange != null)
-                allHistoryChanges.add(historyChange);
+            this.createSimpleChanges(measurementChanges.get(i.getAndIncrement()), measurementChanges.get(j.getAndIncrement()))
+                .ifPresent(allHistoryChanges::add);
         }
 
         return allHistoryChanges;
     }
 
-    private HistoryChange createSimpleChanges(final Measurement oldMeasurement, final Measurement newMeasurement) {
+    private Optional<HistoryChange> createSimpleChanges(final Measurement oldMeasurement, final Measurement newMeasurement) {
         final List<HistorySimpleChange> simpleMeasurementChanges = this.compareMeasurementVersions(oldMeasurement, newMeasurement);
         final List<HistoryPicketChange> simplePicketsChanges = this.comparePickets(oldMeasurement.getPickets(), newMeasurement.getPickets());
 
         if (!simpleMeasurementChanges.isEmpty() || !simplePicketsChanges.isEmpty())
-            return HistoryChange
+            return Optional.of(HistoryChange
                 .builder()
                 .measurementChanges(simpleMeasurementChanges)
                 .picketChanges(simplePicketsChanges)
                 .dateTime(newMeasurement.getCreationDate())
-                .build();
+                .build());
 
-        return null;
+        return Optional.empty();
     }
 
     private List<HistorySimpleChange> compareMeasurementVersions(final Measurement oldMeasurement, final Measurement newMeasurement) {

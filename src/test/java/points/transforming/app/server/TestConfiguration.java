@@ -12,7 +12,7 @@ public class TestConfiguration {
     @Bean
     @Primary
     DataSource itTestDataSource() {
-        var result = new DriverManagerDataSource("jdbc:mysql://localhost:3306/points_transforming_it?serverTimezone=UTC", "root", "root");
+        var result = new DriverManagerDataSource("jdbc:mysql://localhost:3306/points_transforming_it?serverTimezone=UTC", "root", "rootroot");
         result.setDriverClassName("com.mysql.cj.jdbc.Driver");
         return result;
     }
