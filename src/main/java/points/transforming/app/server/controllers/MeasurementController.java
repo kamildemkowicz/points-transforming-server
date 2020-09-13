@@ -7,7 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import points.transforming.app.server.models.measurement.MeasurementReadModel;
 import points.transforming.app.server.models.measurement.MeasurementWriteModel;
-import points.transforming.app.server.services.MeasurementService;
+import points.transforming.app.server.services.measurement.MeasurementResponseProvider;
+import points.transforming.app.server.services.measurement.MeasurementService;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -36,7 +37,7 @@ public class MeasurementController {
 
     @GetMapping(value = "/{measurementInternalId}")
     public ResponseEntity<MeasurementReadModel> getMeasurement(@PathVariable String measurementInternalId) {
-        return ResponseEntity.ok().body(this.measurementService.getMeasurement(measurementInternalId));
+        return new MeasurementResponseProvider().doResponse(measurementService.getMeasurement(measurementInternalId));
     }
 
     @PostMapping

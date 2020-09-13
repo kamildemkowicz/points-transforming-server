@@ -1,4 +1,4 @@
-package points.transforming.app.server.services;
+package points.transforming.app.server.services.measurement;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -9,6 +9,9 @@ import points.transforming.app.server.models.measurement.MeasurementWriteModel;
 import points.transforming.app.server.models.user.User;
 import points.transforming.app.server.repositories.MeasurementRepository;
 import points.transforming.app.server.repositories.UserRepository;
+import points.transforming.app.server.services.PicketService;
+
+
 
 import java.util.List;
 import java.util.Optional;
@@ -43,8 +46,10 @@ public class MeasurementService {
                 .collect(Collectors.toList());
     }
 
-    public MeasurementReadModel getMeasurement(String measurementInternalId) {
-        return new MeasurementReadModel(this.findMeasurementByInternalId(measurementInternalId));
+    public Measurement getMeasurement(String measurementInternalId) {
+        return this.measurementRepository
+            .findByMeasurementInternalIdAndEndDate(measurementInternalId, null)
+            .orElseThrow(() -> new MeasurementNotFoundException(measurementInternalId));
     }
 
     public MeasurementReadModel createMeasurement(MeasurementWriteModel measurementWriteModel) {
@@ -64,7 +69,7 @@ public class MeasurementService {
         // TODO it will be fixed after authentication will be added
         final Optional<User> user = userRepository.findById(1);
 
-        final Measurement oldMeasurement = this.findMeasurementByInternalId(internalMeasurementId);
+        final Measurement oldMeasurement = getMeasurement(internalMeasurementId);
         final Measurement measurement = newMeasurement.toMeasurement(user.get());
 
         measurement.setVersion(oldMeasurement.getVersion() + 1);
@@ -77,11 +82,5 @@ public class MeasurementService {
         this.measurementRepository.save(oldMeasurement);
 
         return new MeasurementReadModel(newMeasurementCreated);
-    }
-
-    private Measurement findMeasurementByInternalId(String internalId) {
-        return this.measurementRepository
-                .findByMeasurementInternalIdAndEndDate(internalId, null)
-                .orElseThrow(() -> new MeasurementNotFoundException(internalId));
     }
 }

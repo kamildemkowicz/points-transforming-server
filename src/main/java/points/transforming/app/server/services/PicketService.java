@@ -30,4 +30,8 @@ public class PicketService {
             }
         });
     }
+
+    public void savePickets(final List<Picket> pickets) {
+        picketRepository.saveAll(pickets);
+    }
 }
