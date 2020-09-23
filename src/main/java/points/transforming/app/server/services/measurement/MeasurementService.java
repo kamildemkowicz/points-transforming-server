@@ -11,8 +11,6 @@ import points.transforming.app.server.repositories.MeasurementRepository;
 import points.transforming.app.server.repositories.UserRepository;
 import points.transforming.app.server.services.PicketService;
 
-
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

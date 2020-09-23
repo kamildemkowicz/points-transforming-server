@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import points.transforming.app.server.models.history.HistoryChanges;
-import points.transforming.app.server.services.HistoryService;
+import points.transforming.app.server.services.history.HistoryService;
 
 @RestController
 @AllArgsConstructor

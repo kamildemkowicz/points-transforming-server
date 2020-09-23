@@ -10,6 +10,6 @@ import points.transforming.app.server.models.picket.PicketReadModel;
 @Getter
 public class HistoryPicketChange {
     private final PicketReadModel picket;
-    private final List<HistorySimpleChange> picketChanges;
+    private final List<HistorySimpleChange> picketSimpleChanges;
     private final HistoryChangeType type;
 }

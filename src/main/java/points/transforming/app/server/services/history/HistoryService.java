@@ -1,4 +1,4 @@
-package points.transforming.app.server.services;
+package points.transforming.app.server.services.history;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -91,7 +91,7 @@ public class HistoryService {
             picketsChanges.add(
                 HistoryPicketChange.builder()
                     .picket(new PicketReadModel(addedPicket))
-                    .picketChanges(List.of(
+                    .picketSimpleChanges(List.of(
                         createHistoryChange("Internal ID", null, addedPicket.getPicketInternalId(), HistoryChangeType.ADD),
                         createHistoryChange("name", null, addedPicket.getName(), HistoryChangeType.ADD),
                         createHistoryChange("coordinate X", null, String.valueOf(addedPicket.getCoordinateX()), HistoryChangeType.ADD),
@@ -106,7 +106,7 @@ public class HistoryService {
             picketsChanges.add(
                 HistoryPicketChange.builder()
                     .picket(new PicketReadModel(removedPicket))
-                    .picketChanges(List.of(
+                    .picketSimpleChanges(List.of(
                         createHistoryChange("Internal ID", removedPicket.getPicketInternalId(), null, HistoryChangeType.REMOVE),
                         createHistoryChange("name", removedPicket.getName(), null, HistoryChangeType.REMOVE),
                         createHistoryChange("coordinate X", String.valueOf(removedPicket.getCoordinateX()), null, HistoryChangeType.REMOVE),
@@ -121,7 +121,7 @@ public class HistoryService {
             final var oldPicket = changedPicketPair.getFirst();
             final var newPicket = changedPicketPair.getSecond();
 
-            picketsChanges.add(createPicketHistoryChange(oldPicket, newPicket));
+            createPicketHistoryChange(oldPicket, newPicket).ifPresent(picketsChanges::add);
         });
 
         return picketsChanges;
@@ -159,23 +159,26 @@ public class HistoryService {
         return changedPickets;
     }
 
-    private HistoryPicketChange createPicketHistoryChange(final Picket oldPicket, final Picket newPicket) {
+    private Optional<HistoryPicketChange> createPicketHistoryChange(final Picket oldPicket, final Picket newPicket) {
         final var singlePicketHistoryChanges = new ArrayList<HistorySimpleChange>();
         if (!(oldPicket.getName().equals(newPicket.getName())))
             singlePicketHistoryChanges.add(createHistoryChange("name", oldPicket.getName(), newPicket.getName(), HistoryChangeType.CHANGED_VALUE));
         if (oldPicket.getCoordinateX() != newPicket.getCoordinateX()) {
-            singlePicketHistoryChanges.add(createHistoryChange("coordinateX", String.valueOf(oldPicket.getCoordinateX()),
+            singlePicketHistoryChanges.add(createHistoryChange("coordinate X", String.valueOf(oldPicket.getCoordinateX()),
                 String.valueOf(newPicket.getCoordinateX()), HistoryChangeType.CHANGED_VALUE));
         }
         if (oldPicket.getCoordinateY() != newPicket.getCoordinateY()) {
-            singlePicketHistoryChanges.add(createHistoryChange("coordinateY", String.valueOf(oldPicket.getCoordinateY()),
+            singlePicketHistoryChanges.add(createHistoryChange("coordinate Y", String.valueOf(oldPicket.getCoordinateY()),
                 String.valueOf(newPicket.getCoordinateY()), HistoryChangeType.CHANGED_VALUE));
         }
 
-        return HistoryPicketChange.builder()
+        if (singlePicketHistoryChanges.isEmpty())
+            return Optional.empty();
+
+        return Optional.of(HistoryPicketChange.builder()
             .picket(new PicketReadModel(oldPicket))
-            .picketChanges(singlePicketHistoryChanges)
+            .picketSimpleChanges(singlePicketHistoryChanges)
             .type(HistoryChangeType.CHANGED_VALUE)
-            .build();
+            .build());
     }
 }

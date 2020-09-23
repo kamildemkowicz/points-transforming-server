@@ -9,6 +9,8 @@ import points.transforming.app.server.services.tachymetry.quarter.ThirdQuarter;
 
 public class QuarterStrategyBuilder {
 
+    private QuarterStrategyBuilder() {}
+
     public static QuarterStrategy buildQuarterStrategy(final BigDecimal differenceX, final BigDecimal differenceY) {
         if (differenceX.compareTo(BigDecimal.ZERO) >= 0 && differenceY.compareTo(BigDecimal.ZERO) >= 0)
             return new FirstQuarter(differenceX, differenceY);
