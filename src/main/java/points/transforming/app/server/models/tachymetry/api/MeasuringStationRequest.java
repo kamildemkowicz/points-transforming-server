@@ -1,5 +1,6 @@
 package points.transforming.app.server.models.tachymetry.api;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.util.List;
@@ -17,7 +18,7 @@ public class MeasuringStationRequest {
     @Positive
     private final Long stationNumber;
 
-    @NotNull
+    @NotBlank
     private final String stationName;
 
     @NotNull

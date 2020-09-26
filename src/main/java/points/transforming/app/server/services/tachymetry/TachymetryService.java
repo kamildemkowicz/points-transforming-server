@@ -1,6 +1,7 @@
 package points.transforming.app.server.services.tachymetry;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,7 +9,7 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import points.transforming.app.server.exceptions.MeasurementNotFoundException;
+import points.transforming.app.server.exceptions.tachymetry.ControlNetworkPointsException;
 import points.transforming.app.server.models.measurement.Measurement;
 import points.transforming.app.server.models.picket.Picket;
 import points.transforming.app.server.models.picket.PicketMappers;
@@ -27,11 +28,14 @@ public class TachymetryService {
 
     private final MeasurementService measurementService;
     private final PicketService picketService;
+    private final TachymetryValidator tachymetryValidator;
 
     @Transactional
     public List<MeasuringStation> calculateTachymetry(final TachymetryRequest tachymetryRequest) {
         final var calculatedMeasuringStations = new ArrayList<MeasuringStation>();
         final var measurement = measurementService.getMeasurement(tachymetryRequest.getInternalMeasurementId());
+        tachymetryValidator.validateTachymetryRequest(tachymetryRequest);
+
         tachymetryRequest.getMeasuringStations().forEach(measuringStation -> calculatedMeasuringStations.add(calculateMeasuringStation(measuringStation,
             measurement)));
 
@@ -90,8 +94,8 @@ public class TachymetryService {
         final var differenceX = endControlNetworkPoint.getCoordinateX().subtract(startingControlNetworkPoint.getCoordinateX());
         final var differenceY = endControlNetworkPoint.getCoordinateY().subtract(startingControlNetworkPoint.getCoordinateY());
 
-        if (differenceX.equals(BigDecimal.ZERO) && differenceY.equals(BigDecimal.ZERO)) {
-            throw new MeasurementNotFoundException("exception");
+        if (differenceX.equals(BigDecimal.valueOf(0.0)) && differenceY.equals(BigDecimal.valueOf(0.0))) {
+            throw new ControlNetworkPointsException(startingControlNetworkPoint.getName(), endControlNetworkPoint.getName());
         }
 
         return QuarterStrategyBuilder.buildQuarterStrategy(differenceX, differenceY).calculateAzimuth();
@@ -102,11 +106,13 @@ public class TachymetryService {
     }
 
     private BigDecimal calculateDifferenceCoordinateX(final BigDecimal distance, final BigDecimal angle) {
-        return BigDecimal.valueOf(Math.cos(TachymetryUtils.calculateFromGradToRadian(angle.doubleValue())) * distance.doubleValue());
+        return BigDecimal.valueOf(Math.cos(TachymetryUtils.calculateFromGradToRadian(angle.doubleValue())) * distance.doubleValue())
+            .setScale(2, RoundingMode.CEILING);
     }
 
     private BigDecimal calculateDifferenceCoordinateY(final BigDecimal distance, final BigDecimal angle) {
-        return BigDecimal.valueOf(Math.sin(TachymetryUtils.calculateFromGradToRadian(angle.doubleValue())) * distance.doubleValue());
+        return BigDecimal.valueOf(Math.sin(TachymetryUtils.calculateFromGradToRadian(angle.doubleValue())) * distance.doubleValue())
+            .setScale(2, RoundingMode.CEILING);
     }
 
     private List<Picket> createPicketsFromMeasuringPoints(final List<Point> points) {

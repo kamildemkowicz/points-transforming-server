@@ -1,5 +1,7 @@
 package points.transforming.app.server.services.history;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -151,19 +153,19 @@ public class HistoryServiceTest {
 
         assertThat(result.getChanges().get(0).getMeasurementChanges().size()).isEqualTo(2);
         assertThat(result.getChanges().get(0).getMeasurementChanges().get(0).getLabel()).isEqualTo("name");
-        assertThat(result.getChanges().get(0).getMeasurementChanges().get(0).getOldValue()).isEqualTo("Measurement1");
-        assertThat(result.getChanges().get(0).getMeasurementChanges().get(0).getNewValue()).isEqualTo("Measurement2");
+        assertThat(result.getChanges().get(0).getMeasurementChanges().get(0).getOldValue()).isEqualTo("Measurement2");
+        assertThat(result.getChanges().get(0).getMeasurementChanges().get(0).getNewValue()).isEqualTo("Measurement1");
         assertThat(result.getChanges().get(0).getMeasurementChanges().get(0).getType()).isEqualTo(HistoryChangeType.CUSTOM);
         assertThat(result.getChanges().get(0).getPicketChanges()).isEmpty();
-        assertThat(result.getChanges().get(0).getDateTime()).isEqualTo(now);
+        assertThat(result.getChanges().get(0).getDateTime()).isEqualTo(now2);
 
         assertThat(result.getChanges().get(1).getMeasurementChanges().size()).isEqualTo(2);
         assertThat(result.getChanges().get(1).getMeasurementChanges().get(0).getLabel()).isEqualTo("name");
-        assertThat(result.getChanges().get(1).getMeasurementChanges().get(0).getOldValue()).isEqualTo("Measurement2");
-        assertThat(result.getChanges().get(1).getMeasurementChanges().get(0).getNewValue()).isEqualTo("Measurement1");
+        assertThat(result.getChanges().get(1).getMeasurementChanges().get(0).getOldValue()).isEqualTo("Measurement1");
+        assertThat(result.getChanges().get(1).getMeasurementChanges().get(0).getNewValue()).isEqualTo("Measurement2");
         assertThat(result.getChanges().get(1).getMeasurementChanges().get(0).getType()).isEqualTo(HistoryChangeType.CUSTOM);
         assertThat(result.getChanges().get(1).getPicketChanges()).isEmpty();
-        assertThat(result.getChanges().get(1).getDateTime()).isEqualTo(now2);
+        assertThat(result.getChanges().get(1).getDateTime()).isEqualTo(now);
     }
 
     @Test
@@ -375,15 +377,15 @@ public class HistoryServiceTest {
         assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(3).getLabel()).isEqualTo("coordinate Y");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(0).getOldValue())
-            .isEqualTo(String.valueOf(picket1Old.getCoordinateX()));
+            .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1Old.getCoordinateX()).setScale(2, RoundingMode.CEILING)));
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(0).getNewValue())
-            .isEqualTo(String.valueOf(picket1New.getCoordinateX()));
+            .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1New.getCoordinateX()).setScale(2, RoundingMode.CEILING)));
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(0).getLabel()).isEqualTo("coordinate X");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(1).getOldValue())
-            .isEqualTo(String.valueOf(picket1Old.getCoordinateY()));
+            .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1Old.getCoordinateY()).setScale(2, RoundingMode.CEILING)));
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(1).getNewValue())
-            .isEqualTo(String.valueOf(picket1New.getCoordinateY()));
+            .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1New.getCoordinateY()).setScale(2, RoundingMode.CEILING)));
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(1).getLabel()).isEqualTo("coordinate Y");
     }
 }

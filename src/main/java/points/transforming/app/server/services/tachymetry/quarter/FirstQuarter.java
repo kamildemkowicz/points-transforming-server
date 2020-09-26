@@ -1,6 +1,7 @@
 package points.transforming.app.server.services.tachymetry.quarter;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import lombok.AllArgsConstructor;
 import points.transforming.app.server.services.tachymetry.QuarterStrategy;
@@ -19,11 +20,11 @@ public class FirstQuarter implements QuarterStrategy {
         if (differenceY.equals(BigDecimal.ZERO))
             return BigDecimal.valueOf(0);
 
-        final var angle = differenceY.divide(differenceX);
+        final var angle = differenceY.divide(differenceX, 10, RoundingMode.HALF_UP);
 
         final var angleInRadian = Math.abs(Math.atan(angle.doubleValue()));
         final var angleInGrad = TachymetryUtils.calculateFromRadianToGrad(angleInRadian);
 
-        return BigDecimal.valueOf(angleInGrad);
+        return BigDecimal.valueOf(angleInGrad).setScale(4, RoundingMode.CEILING);
     }
 }

@@ -11,6 +11,7 @@ public class MeasurementNotFoundException extends RuntimeException {
         this.measurementId = measurementId;
     }
 
+    @Override
     public String toString() {
         return "Measurement " + this.measurementId + " does not exist";
     }

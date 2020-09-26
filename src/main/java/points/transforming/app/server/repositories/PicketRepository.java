@@ -7,5 +7,5 @@ import points.transforming.app.server.models.picket.Picket;
 public interface PicketRepository {
     int getHighestInternalId();
 
-    List<Picket> saveAll(List<Picket> pickets);
+    List<Picket> save(List<Picket> pickets);
 }

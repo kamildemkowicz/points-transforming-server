@@ -9,5 +9,5 @@ public class TachymetryMetaDataResponse {
     private final String tachymetrName;
     private final String tachymetrType;
     private final Double temperature;
-    private final Integer pressure;
+    private final Long pressure;
 }
