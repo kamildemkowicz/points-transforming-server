@@ -1,13 +1,13 @@
 package points.transforming.app.server.models.measurement;
 
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 import points.transforming.app.server.models.picket.Picket;
 import points.transforming.app.server.models.user.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -40,6 +40,10 @@ public class Measurement {
 
     @NotNull
     private String owner;
+
+    @NotNull
+    @Positive
+    private int districtId;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

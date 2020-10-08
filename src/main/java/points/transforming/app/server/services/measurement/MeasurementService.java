@@ -9,7 +9,7 @@ import points.transforming.app.server.models.measurement.MeasurementWriteModel;
 import points.transforming.app.server.models.user.User;
 import points.transforming.app.server.repositories.MeasurementRepository;
 import points.transforming.app.server.repositories.UserRepository;
-import points.transforming.app.server.services.PicketService;
+import points.transforming.app.server.services.picket.PicketService;
 
 import java.util.List;
 import java.util.Optional;
@@ -56,7 +56,8 @@ public class MeasurementService {
         picketService.setPicketInternalIds(measurementWriteModel.getPickets());
         int highestMeasurementInternalId = this.measurementRepository.getHighestInternalId();
 
-        Measurement measurement = measurementWriteModel.toMeasurement(user.get());
+        final Measurement measurement = measurementWriteModel.toMeasurement(user.get());
+        picketService.calculateCoordinatesToWgs84(measurement);
         measurement.setMeasurementInternalId("MES-" + (highestMeasurementInternalId + 1));
         measurement.setVersion(1);
 
@@ -73,6 +74,7 @@ public class MeasurementService {
         measurement.setVersion(oldMeasurement.getVersion() + 1);
         measurement.setMeasurementInternalId(oldMeasurement.getMeasurementInternalId());
         picketService.setInternalIdsForNewPickets(measurement.getPickets());
+        picketService.calculateCoordinatesToWgs84(measurement);
 
         final Measurement newMeasurementCreated = this.measurementRepository.save(measurement);
         oldMeasurement.setEndDate(newMeasurementCreated.getCreationDate());

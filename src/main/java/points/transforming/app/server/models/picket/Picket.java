@@ -24,6 +24,10 @@ public class Picket {
     private double coordinateX;
     @NotNull
     private double coordinateY;
+    @Column(name = "coordinate_x_2000")
+    private double coordinateX2000;
+    @Column(name = "coordinate_y_2000")
+    private double coordinateY2000;
 
     @ManyToOne
     @JoinColumn(name = "measurement_id")

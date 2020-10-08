@@ -16,6 +16,8 @@ import points.transforming.app.server.services.tachymetry.TachymetryService;
 @RestController
 @RequestMapping("tachymetry")
 @AllArgsConstructor
+@TachymetryExceptionProcessing
+@MeasurementExceptionProcessing
 public class TachymetryController {
 
     private final TachymetryService tachymetryService;

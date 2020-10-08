@@ -6,19 +6,19 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import points.transforming.app.server.models.tachymetry.api.*;
-import points.transforming.app.server.models.tachymetry.polarmethod.MeasuringStation;
+import points.transforming.app.server.models.tachymetry.polarmethod.MeasuringStationDto;
 
 public class TachymetryResponseProvider {
 
     public ResponseEntity<TachymetryResponse> doResponse(final String internalMeasurementId,
-                                                         final List<MeasuringStation> measuringStations,
+                                                         final List<MeasuringStationDto> measuringStations,
                                                          final TachymetryMetaDataRequest tachymetryMetaData) {
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(TachymetryResponse.builder()
                 .internalMeasurementId(internalMeasurementId)
                 .tachymetryMetaData(TachymetryMetaDataResponse.builder()
-                    .tachymetrName(tachymetryMetaData.getTachymetrName())
+                    .tachymetrName(tachymetryMetaData.getTachymetryName())
                     .tachymetrType(tachymetryMetaData.getTachymetrType())
                     .pressure(tachymetryMetaData.getPressure())
                     .temperature(tachymetryMetaData.getTemperature())

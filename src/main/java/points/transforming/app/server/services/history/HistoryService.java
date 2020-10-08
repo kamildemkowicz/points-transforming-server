@@ -101,7 +101,11 @@ public class HistoryService {
                         createHistoryChange("coordinate X", null, String.valueOf(
                             BigDecimal.valueOf(addedPicket.getCoordinateX()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD),
                         createHistoryChange("coordinate Y", null, String.valueOf(
-                            BigDecimal.valueOf(addedPicket.getCoordinateY()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD)
+                            BigDecimal.valueOf(addedPicket.getCoordinateY()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD),
+                        createHistoryChange("coordinate X 2000", null, String.valueOf(
+                            BigDecimal.valueOf(addedPicket.getCoordinateX2000()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD),
+                        createHistoryChange("coordinate Y 2000", null, String.valueOf(
+                            BigDecimal.valueOf(addedPicket.getCoordinateY2000()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD)
                     ))
                     .type(HistoryChangeType.ADD)
                     .build()
@@ -121,6 +125,14 @@ public class HistoryService {
                             HistoryChangeType.REMOVE),
                         createHistoryChange("coordinate Y", String.valueOf(
                             BigDecimal.valueOf(removedPicket.getCoordinateY()).setScale(2, RoundingMode.CEILING)),
+                            null,
+                            HistoryChangeType.REMOVE),
+                        createHistoryChange("coordinate X 2000", String.valueOf(
+                            BigDecimal.valueOf(removedPicket.getCoordinateX2000()).setScale(2, RoundingMode.CEILING)),
+                            null,
+                            HistoryChangeType.REMOVE),
+                        createHistoryChange("coordinate Y 2000", String.valueOf(
+                            BigDecimal.valueOf(removedPicket.getCoordinateY2000()).setScale(2, RoundingMode.CEILING)),
                             null,
                             HistoryChangeType.REMOVE)
                     ))
@@ -181,10 +193,25 @@ public class HistoryService {
                 String.valueOf(BigDecimal.valueOf(newPicket.getCoordinateX()).setScale(2, RoundingMode.CEILING)),
                 HistoryChangeType.CHANGED_VALUE));
         }
+
         if (oldPicket.getCoordinateY() != newPicket.getCoordinateY()) {
             singlePicketHistoryChanges.add(createHistoryChange("coordinate Y",
                 String.valueOf(BigDecimal.valueOf(oldPicket.getCoordinateY()).setScale(2, RoundingMode.CEILING)),
                 String.valueOf(BigDecimal.valueOf(newPicket.getCoordinateY()).setScale(2, RoundingMode.CEILING)),
+                HistoryChangeType.CHANGED_VALUE));
+        }
+
+        if (oldPicket.getCoordinateX2000() != newPicket.getCoordinateX2000()) {
+            singlePicketHistoryChanges.add(createHistoryChange("coordinate X 2000",
+                String.valueOf(BigDecimal.valueOf(oldPicket.getCoordinateX2000()).setScale(2, RoundingMode.CEILING)),
+                String.valueOf(BigDecimal.valueOf(newPicket.getCoordinateX2000()).setScale(2, RoundingMode.CEILING)),
+                HistoryChangeType.CHANGED_VALUE));
+        }
+
+        if (oldPicket.getCoordinateY2000() != newPicket.getCoordinateY2000()) {
+            singlePicketHistoryChanges.add(createHistoryChange("coordinate Y 2000",
+                String.valueOf(BigDecimal.valueOf(oldPicket.getCoordinateY2000()).setScale(2, RoundingMode.CEILING)),
+                String.valueOf(BigDecimal.valueOf(newPicket.getCoordinateY2000()).setScale(2, RoundingMode.CEILING)),
                 HistoryChangeType.CHANGED_VALUE));
         }
 

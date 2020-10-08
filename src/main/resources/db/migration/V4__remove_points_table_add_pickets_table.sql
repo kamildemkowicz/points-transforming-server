@@ -9,5 +9,7 @@ create table picket(
     name VARCHAR(255) NOT NULL,
     coordinateX DOUBLE NOT NULL,
     coordinateY DOUBLE NOT NULL,
+    coordinate_x_2000 DOUBLE,
+    coordinate_y_2000 DOUBLE,
     measurement_id int NOT NULL
 );

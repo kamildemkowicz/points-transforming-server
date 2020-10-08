@@ -2,11 +2,11 @@ package points.transforming.app.server.models.tachymetry.api;
 
 import java.util.stream.Collectors;
 
-import points.transforming.app.server.models.tachymetry.polarmethod.MeasuringStation;
+import points.transforming.app.server.models.tachymetry.polarmethod.MeasuringStationDto;
 
 public final class MeasuringStationMappers {
 
-    public static MeasuringStationResponse of(final MeasuringStation measuringStation) {
+    public static MeasuringStationResponse of(final MeasuringStationDto measuringStation) {
         return MeasuringStationResponse.builder()
             .stationName(measuringStation.getStationName())
             .stationNumber(measuringStation.getStationNumber())

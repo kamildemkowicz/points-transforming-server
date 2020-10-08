@@ -23,4 +23,12 @@ public class TachymetryUtilsTest {
 
         assertThat(result).isEqualTo(159.15494309189535);
     }
+
+    @Test
+    public void shouldCalculateFromRadianToDegreesWorksAsExpected() {
+        // when
+        final var result = TachymetryUtils.calculateFromRadianToDegrees(2.5);
+
+        assertThat(result.doubleValue()).isEqualTo(143.2394487827058);
+    }
 }
