@@ -1,11 +1,12 @@
 package points.transforming.app.server.services.measurement;
 
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import points.transforming.app.server.exceptions.MeasurementNotFoundException;
 import points.transforming.app.server.models.measurement.Measurement;
-import points.transforming.app.server.models.measurement.MeasurementReadModel;
-import points.transforming.app.server.models.measurement.MeasurementWriteModel;
+import points.transforming.app.server.models.measurement.MeasurementResponse;
+import points.transforming.app.server.models.measurement.MeasurementRequest;
 import points.transforming.app.server.models.user.User;
 import points.transforming.app.server.repositories.MeasurementRepository;
 import points.transforming.app.server.repositories.UserRepository;
@@ -16,63 +17,66 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class MeasurementService {
     private final MeasurementRepository measurementRepository;
     private final UserRepository userRepository;
     private final PicketService picketService;
+    private final DistrictService districtService;
 
-    public MeasurementService(MeasurementRepository measurementRepository, UserRepository userRepository, PicketService picketService) {
-        this.measurementRepository = measurementRepository;
-        this.userRepository = userRepository;
-        this.picketService = picketService;
-    }
-
-    public List<MeasurementReadModel> getAllMeasurement() {
+    public List<MeasurementResponse> getAllMeasurement() {
         return this.measurementRepository
                 .findAll()
                 .stream()
-                .map(MeasurementReadModel::new)
+                .map(MeasurementResponse::of)
                 .collect(Collectors.toList());
     }
 
-    public List<MeasurementReadModel> getAllMeasurement(Pageable page) {
+    public List<MeasurementResponse> getAllMeasurement(final Pageable page) {
         return this.measurementRepository
                 .findAll(page)
                 .getContent()
                 .stream()
-                .map(MeasurementReadModel::new)
+                .map(MeasurementResponse::of)
                 .collect(Collectors.toList());
     }
 
-    public Measurement getMeasurement(String measurementInternalId) {
+    public Measurement getMeasurement(final String measurementInternalId) {
         return this.measurementRepository
             .findByMeasurementInternalIdAndEndDate(measurementInternalId, null)
-            .orElseThrow(() -> new MeasurementNotFoundException(measurementInternalId));
+            .orElseThrow(() -> new MeasurementNotFoundException(Error.MEASUREMENT_DOES_NOT_EXIST_PTS100));
     }
 
-    public MeasurementReadModel createMeasurement(MeasurementWriteModel measurementWriteModel) {
+    public Measurement createMeasurement(final MeasurementRequest measurementRequest) {
         // TODO it will be fixed after authentication will be added
-        Optional<User> user = userRepository.findById(1);
-        picketService.setPicketInternalIds(measurementWriteModel.getPickets());
-        int highestMeasurementInternalId = this.measurementRepository.getHighestInternalId();
+        final Optional<User> user = userRepository.findById(1);
+        final int highestMeasurementInternalId = this.measurementRepository.getHighestInternalId();
 
-        final Measurement measurement = measurementWriteModel.toMeasurement(user.get());
-        picketService.calculateCoordinatesToWgs84(measurement);
+        final Measurement measurement = MeasurementMapper.toMeasurementFrom(measurementRequest);
+
+        measurement.setUser(user.get());
+        measurement.setDistrict(districtService.getDistrictById(measurementRequest.getDistrictId()));
         measurement.setMeasurementInternalId("MES-" + (highestMeasurementInternalId + 1));
         measurement.setVersion(1);
 
-        return new MeasurementReadModel(this.measurementRepository.save(measurement));
+        picketService.setPicketInternalIds(measurement.getPickets());
+        picketService.calculateCoordinatesToWgs84(measurement);
+
+        return this.measurementRepository.save(measurement);
     }
 
-    public MeasurementReadModel updateMeasurement(String internalMeasurementId, MeasurementWriteModel newMeasurement) {
+    public Measurement updateMeasurement(final String internalMeasurementId, final MeasurementRequest measurementRequest) {
         // TODO it will be fixed after authentication will be added
         final Optional<User> user = userRepository.findById(1);
 
         final Measurement oldMeasurement = getMeasurement(internalMeasurementId);
-        final Measurement measurement = newMeasurement.toMeasurement(user.get());
+        final Measurement measurement = MeasurementMapper.toMeasurementFrom(measurementRequest);
 
+        measurement.setUser(user.get());
+        measurement.setDistrict(districtService.getDistrictById(measurementRequest.getDistrictId()));
         measurement.setVersion(oldMeasurement.getVersion() + 1);
         measurement.setMeasurementInternalId(oldMeasurement.getMeasurementInternalId());
+
         picketService.setInternalIdsForNewPickets(measurement.getPickets());
         picketService.calculateCoordinatesToWgs84(measurement);
 
@@ -81,6 +85,10 @@ public class MeasurementService {
 
         this.measurementRepository.save(oldMeasurement);
 
-        return new MeasurementReadModel(newMeasurementCreated);
+        return newMeasurementCreated;
+    }
+
+    enum Error {
+        MEASUREMENT_DOES_NOT_EXIST_PTS100
     }
 }

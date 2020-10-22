@@ -1,20 +1,16 @@
 package points.transforming.app.server.exceptions.tachymetry;
 
-public class ControlNetworkPointsException extends RuntimeException {
-    private final String startingPointName;
-    private final String endPointName;
+import org.springframework.http.HttpStatus;
+import points.transforming.app.server.exceptions.PointsTransformingException;
 
-    public ControlNetworkPointsException(final String startingPointName, final String endPointName) {
-        this.startingPointName = startingPointName;
-        this.endPointName = endPointName;
+public class ControlNetworkPointsException extends PointsTransformingException {
+
+    public ControlNetworkPointsException(final Enum enumError) {
+        super(enumError);
     }
 
     @Override
-    public String toString() {
-        return "Starting point "
-            + startingPointName
-            + " and end point "
-            + endPointName
-            + " cannot be the same.";
+    public HttpStatus getHttpStatus() {
+        return HttpStatus.BAD_REQUEST;
     }
 }

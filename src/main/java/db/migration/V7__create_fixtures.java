@@ -6,6 +6,7 @@ import org.flywaydb.core.api.migration.Context;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import points.transforming.app.server.models.measurement.District;
 import points.transforming.app.server.models.measurement.Measurement;
 import points.transforming.app.server.models.picket.Picket;
 import points.transforming.app.server.models.user.User;
@@ -26,6 +27,7 @@ public class V7__create_fixtures extends BaseJavaMigration {
     private final List<Measurement> measurements = new ArrayList<>();
     private final List<Picket> pickets = new ArrayList<>();
     User user = new User();
+    private final District district = new District();
 
     Random r = new Random();
 
@@ -47,7 +49,7 @@ public class V7__create_fixtures extends BaseJavaMigration {
         var insertUsers = "INSERT INTO users (user_name, password, email) VALUES (?, ?, ?)";
         var insertMeasurement = "INSERT INTO measurement (measurement_internal_id, name, creation_date, end_date, place, owner, version, user_id, district_id)" +
             " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        var insertPickets = "INSERT INTO picket (picket_internal_id, name, coordinateX, coordinateY, coordinate_x_2000, coordinate_y_2000, measurement_id)" +
+        var insertPickets = "INSERT INTO picket (picket_internal_id, name, latitude, longitude, coordinate_x_2000, coordinate_y_2000, measurement_id)" +
             " VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         new JdbcTemplate(new SingleConnectionDataSource(context.getConnection(), true))
@@ -77,7 +79,7 @@ public class V7__create_fixtures extends BaseJavaMigration {
                         ps.setString(6, measurements.get(i).getOwner());
                         ps.setInt(7, measurements.get(i).getVersion());
                         ps.setInt(8, measurements.get(i).getUser().getId());
-                        ps.setInt(9, measurements.get(i).getDistrictId());
+                        ps.setInt(9, measurements.get(i).getDistrict().getId());
                     }
 
                     @Override
@@ -100,8 +102,8 @@ public class V7__create_fixtures extends BaseJavaMigration {
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         ps.setString(1, pickets.get(i).getPicketInternalId());
                         ps.setString(2, pickets.get(i).getName());
-                        ps.setDouble(3, pickets.get(i).getCoordinateX());
-                        ps.setDouble(4, pickets.get(i).getCoordinateY());
+                        ps.setDouble(3, pickets.get(i).getLatitude());
+                        ps.setDouble(4, pickets.get(i).getLongitude());
                         ps.setDouble(5, pickets.get(i).getCoordinateX2000());
                         ps.setDouble(6, pickets.get(i).getCoordinateY2000());
                         ps.setInt(7, pickets.get(i).getMeasurement().getId());
@@ -177,7 +179,8 @@ public class V7__create_fixtures extends BaseJavaMigration {
         m.setCreationDate(creationDate);
         m.setEndDate(endDate);
         m.setUser(user);
-        m.setDistrictId(RandomUtils.nextInt(350));
+        district.setId(RandomUtils.nextInt(350));
+        m.setDistrict(district);
         this.measurements.add(m);
     }
 
@@ -185,10 +188,12 @@ public class V7__create_fixtures extends BaseJavaMigration {
         int i = 0;
         int picketInternalId = 1;
         int measurementId = 0;
-        double minX = 17.0000001;
-        double maxX = 19.0000001;
-        double minY = 55.0000001;
-        double maxY = 58.0000001;
+
+        double minX = 55.0000001;
+        double maxX = 58.0000001;
+        double minY = 17.0000001;
+        double maxY = 19.0000001;
+
 
         final var minX2000 = BigDecimal.valueOf(5100000.00);
         final var maxX2000 = BigDecimal.valueOf(5535000.00);
@@ -200,8 +205,8 @@ public class V7__create_fixtures extends BaseJavaMigration {
             var p = new Picket();
             p.setPicketInternalId("PIC-" + picketInternalId);
             p.setName("picket" + i);
-            p.setCoordinateX(getNextDouble(minX, maxX));
-            p.setCoordinateY(getNextDouble(minY, maxY));
+            p.setLatitude(getNextDouble(minX, maxX));
+            p.setLongitude(getNextDouble(minY, maxY));
             p.setCoordinateX2000(getNextDoubleFor2000(minX2000, maxX2000));
             p.setCoordinateY2000(getNextDoubleFor2000(minY2000, maxY2000));
             p.setMeasurement(this.measurements.get(measurementId));

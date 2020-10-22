@@ -6,55 +6,46 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import points.transforming.app.server.models.measurement.MeasurementReadModel;
-import points.transforming.app.server.models.measurement.MeasurementWriteModel;
+import points.transforming.app.server.models.measurement.MeasurementResponse;
+import points.transforming.app.server.models.measurement.MeasurementRequest;
+import points.transforming.app.server.services.measurement.CreateMeasurementResponseProvider;
 import points.transforming.app.server.services.measurement.MeasurementResponseProvider;
 import points.transforming.app.server.services.measurement.MeasurementService;
 
 import javax.validation.Valid;
-import java.net.URI;
 import java.util.List;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping("measurements")
-@MeasurementExceptionProcessing
 public class MeasurementController {
 
     private final MeasurementService measurementService;
     private static final Logger logger = LoggerFactory.getLogger(MeasurementController.class);
 
     @GetMapping(params = {"!sort", "!page", "!size"})
-    public ResponseEntity<List<MeasurementReadModel>> getAllMeasurements() {
+    public ResponseEntity<List<MeasurementResponse>> getAllMeasurements() {
         return ResponseEntity.ok().body(this.measurementService.getAllMeasurement());
     }
 
     @GetMapping
-    public ResponseEntity<List<MeasurementReadModel>> getAllMeasurements(Pageable page) {
+    public ResponseEntity<List<MeasurementResponse>> getAllMeasurements(final Pageable page) {
         return ResponseEntity.ok().body(this.measurementService.getAllMeasurement(page));
     }
 
     @GetMapping(value = "/{measurementInternalId}")
-    public ResponseEntity<MeasurementReadModel> getMeasurement(@PathVariable String measurementInternalId) {
+    public ResponseEntity<MeasurementResponse> getMeasurement(@PathVariable final String measurementInternalId) {
         return new MeasurementResponseProvider().doResponse(measurementService.getMeasurement(measurementInternalId));
     }
 
     @PostMapping
-    public ResponseEntity<MeasurementReadModel> createMeasurement(@RequestBody @Valid MeasurementWriteModel measurementWriteModel) {
-        var result = measurementService.createMeasurement(measurementWriteModel);
-        return ResponseEntity
-                .created(URI.create("/" + result.getId()))
-                .body(result);
+    public ResponseEntity<MeasurementResponse> createMeasurement(@RequestBody @Valid final MeasurementRequest measurementRequest) {
+        return new CreateMeasurementResponseProvider().doResponse(measurementService.createMeasurement(measurementRequest));
     }
 
-    @PostMapping(value = "/{internalMeasurementId}")
-    public ResponseEntity<MeasurementReadModel> updateMeasurement(@PathVariable String internalMeasurementId,
-                                                                  @RequestBody @Valid MeasurementWriteModel measurementWriteModel) {
-        var result = measurementService.updateMeasurement(internalMeasurementId, measurementWriteModel);
-
-        return ResponseEntity
-                .created(URI.create("/" + result.getId()))
-                .body(result);
+    @PutMapping(value = "/{internalMeasurementId}")
+    public ResponseEntity<MeasurementResponse> updateMeasurement(@PathVariable final String internalMeasurementId,
+                                                                 @RequestBody @Valid final MeasurementRequest measurementRequest) {
+        return new CreateMeasurementResponseProvider().doResponse(measurementService.updateMeasurement(internalMeasurementId, measurementRequest));
     }
 }

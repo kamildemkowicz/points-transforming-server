@@ -13,7 +13,7 @@ import points.transforming.app.server.exceptions.MeasurementNotFoundException;
 import points.transforming.app.server.models.history.*;
 import points.transforming.app.server.models.measurement.Measurement;
 import points.transforming.app.server.models.picket.Picket;
-import points.transforming.app.server.models.picket.PicketReadModel;
+import points.transforming.app.server.models.picket.PicketResponse;
 import points.transforming.app.server.repositories.MeasurementRepository;
 
 @Service
@@ -24,7 +24,7 @@ public class HistoryService {
     public HistoryChanges getHistoryChanges(final String measurementInternalId) {
         final List<Measurement> measurementChanges = measurementRepository
             .findByMeasurementInternalId(measurementInternalId)
-            .orElseThrow(() -> new MeasurementNotFoundException(measurementInternalId));
+            .orElseThrow(() -> new MeasurementNotFoundException(Error.MEASUREMENT_DOES_NOT_EXIST_PTS100));
 
         if (measurementChanges.size() <= 1)
             return HistoryChanges.builder().changes(new ArrayList<>()).build();
@@ -94,14 +94,14 @@ public class HistoryService {
         extractDifferentPickets(oldMeasurementPickets, newMeasurementPickets).forEach(addedPicket ->
             picketsChanges.add(
                 HistoryPicketChange.builder()
-                    .picket(new PicketReadModel(addedPicket))
+                    .picket(PicketResponse.of(addedPicket))
                     .picketSimpleChanges(List.of(
                         createHistoryChange("Internal ID", null, addedPicket.getPicketInternalId(), HistoryChangeType.ADD),
                         createHistoryChange("name", null, addedPicket.getName(), HistoryChangeType.ADD),
-                        createHistoryChange("coordinate X", null, String.valueOf(
-                            BigDecimal.valueOf(addedPicket.getCoordinateX()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD),
-                        createHistoryChange("coordinate Y", null, String.valueOf(
-                            BigDecimal.valueOf(addedPicket.getCoordinateY()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD),
+                        createHistoryChange("longitude", null, String.valueOf(
+                            BigDecimal.valueOf(addedPicket.getLongitude()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD),
+                        createHistoryChange("latitude", null, String.valueOf(
+                            BigDecimal.valueOf(addedPicket.getLatitude()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD),
                         createHistoryChange("coordinate X 2000", null, String.valueOf(
                             BigDecimal.valueOf(addedPicket.getCoordinateX2000()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD),
                         createHistoryChange("coordinate Y 2000", null, String.valueOf(
@@ -115,16 +115,16 @@ public class HistoryService {
         extractDifferentPickets(newMeasurementPickets, oldMeasurementPickets).forEach(removedPicket ->
             picketsChanges.add(
                 HistoryPicketChange.builder()
-                    .picket(new PicketReadModel(removedPicket))
+                    .picket(PicketResponse.of(removedPicket))
                     .picketSimpleChanges(List.of(
                         createHistoryChange("Internal ID", removedPicket.getPicketInternalId(), null, HistoryChangeType.REMOVE),
                         createHistoryChange("name", removedPicket.getName(), null, HistoryChangeType.REMOVE),
-                        createHistoryChange("coordinate X", String.valueOf(
-                            BigDecimal.valueOf(removedPicket.getCoordinateX()).setScale(2, RoundingMode.CEILING)),
+                        createHistoryChange("longitude", String.valueOf(
+                            BigDecimal.valueOf(removedPicket.getLongitude()).setScale(2, RoundingMode.CEILING)),
                             null,
                             HistoryChangeType.REMOVE),
-                        createHistoryChange("coordinate Y", String.valueOf(
-                            BigDecimal.valueOf(removedPicket.getCoordinateY()).setScale(2, RoundingMode.CEILING)),
+                        createHistoryChange("latitude", String.valueOf(
+                            BigDecimal.valueOf(removedPicket.getLatitude()).setScale(2, RoundingMode.CEILING)),
                             null,
                             HistoryChangeType.REMOVE),
                         createHistoryChange("coordinate X 2000", String.valueOf(
@@ -187,17 +187,18 @@ public class HistoryService {
         final var singlePicketHistoryChanges = new ArrayList<HistorySimpleChange>();
         if (!(oldPicket.getName().equals(newPicket.getName())))
             singlePicketHistoryChanges.add(createHistoryChange("name", oldPicket.getName(), newPicket.getName(), HistoryChangeType.CHANGED_VALUE));
-        if (oldPicket.getCoordinateX() != newPicket.getCoordinateX()) {
-            singlePicketHistoryChanges.add(createHistoryChange("coordinate X",
-                String.valueOf(BigDecimal.valueOf(oldPicket.getCoordinateX()).setScale(2, RoundingMode.CEILING)),
-                String.valueOf(BigDecimal.valueOf(newPicket.getCoordinateX()).setScale(2, RoundingMode.CEILING)),
+
+        if (oldPicket.getLongitude() != newPicket.getLongitude()) {
+            singlePicketHistoryChanges.add(createHistoryChange("longitude",
+                String.valueOf(BigDecimal.valueOf(oldPicket.getLongitude()).setScale(2, RoundingMode.CEILING)),
+                String.valueOf(BigDecimal.valueOf(newPicket.getLongitude()).setScale(2, RoundingMode.CEILING)),
                 HistoryChangeType.CHANGED_VALUE));
         }
 
-        if (oldPicket.getCoordinateY() != newPicket.getCoordinateY()) {
-            singlePicketHistoryChanges.add(createHistoryChange("coordinate Y",
-                String.valueOf(BigDecimal.valueOf(oldPicket.getCoordinateY()).setScale(2, RoundingMode.CEILING)),
-                String.valueOf(BigDecimal.valueOf(newPicket.getCoordinateY()).setScale(2, RoundingMode.CEILING)),
+        if (oldPicket.getLatitude() != newPicket.getLatitude()) {
+            singlePicketHistoryChanges.add(createHistoryChange("latitude",
+                String.valueOf(BigDecimal.valueOf(oldPicket.getLatitude()).setScale(2, RoundingMode.CEILING)),
+                String.valueOf(BigDecimal.valueOf(newPicket.getLatitude()).setScale(2, RoundingMode.CEILING)),
                 HistoryChangeType.CHANGED_VALUE));
         }
 
@@ -219,9 +220,13 @@ public class HistoryService {
             return Optional.empty();
 
         return Optional.of(HistoryPicketChange.builder()
-            .picket(new PicketReadModel(oldPicket))
+            .picket(PicketResponse.of(oldPicket))
             .picketSimpleChanges(singlePicketHistoryChanges)
             .type(HistoryChangeType.CHANGED_VALUE)
             .build());
+    }
+
+    enum Error {
+        MEASUREMENT_DOES_NOT_EXIST_PTS100
     }
 }

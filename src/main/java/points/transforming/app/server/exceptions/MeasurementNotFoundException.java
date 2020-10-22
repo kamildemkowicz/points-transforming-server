@@ -1,18 +1,15 @@
 package points.transforming.app.server.exceptions;
 
-public class MeasurementNotFoundException extends RuntimeException {
-    private final String measurementId;
+import org.springframework.http.HttpStatus;
 
-    public MeasurementNotFoundException(int measurementId) {
-        this.measurementId = String.valueOf(measurementId);
-    }
+public class MeasurementNotFoundException extends PointsTransformingException {
 
-    public MeasurementNotFoundException(String measurementId) {
-        this.measurementId = measurementId;
+    public MeasurementNotFoundException(final Enum enumError) {
+        super(enumError);
     }
 
     @Override
-    public String toString() {
-        return "Measurement " + this.measurementId + " does not exist";
+    public HttpStatus getHttpStatus() {
+        return HttpStatus.NOT_FOUND;
     }
 }

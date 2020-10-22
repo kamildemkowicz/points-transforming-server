@@ -3,15 +3,14 @@ package points.transforming.app.server.models.tachymetry.api;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import java.util.ArrayList;
 import java.util.List;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
-@AllArgsConstructor
 public class MeasuringStationRequest {
 
     @NotNull
@@ -27,6 +26,6 @@ public class MeasuringStationRequest {
     @NotNull
     private final GeodeticControlNetworkPointRequest endPoint;
 
-    @NotNull
-    private final List<PicketMeasurementDataRequest> picketsMeasurementData;
+    @Builder.Default
+    private final List<PicketMeasurementDataRequest> picketsMeasurementData = new ArrayList<>();
 }

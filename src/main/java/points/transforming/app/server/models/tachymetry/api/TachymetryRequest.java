@@ -1,17 +1,16 @@
 package points.transforming.app.server.models.tachymetry.api;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
-@AllArgsConstructor
 public class TachymetryRequest {
 
     @NotBlank
@@ -20,6 +19,7 @@ public class TachymetryRequest {
     @NotNull
     private final TachymetryMetaDataRequest tachymetryMetaData;
 
+    @NotEmpty
     @NotNull
     private final List<MeasuringStationRequest> measuringStations;
 

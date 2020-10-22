@@ -41,9 +41,9 @@ public class Measurement {
     @NotNull
     private String owner;
 
-    @NotNull
-    @Positive
-    private int districtId;
+    @ManyToOne
+    @JoinColumn(name = "district_id")
+    private District district;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

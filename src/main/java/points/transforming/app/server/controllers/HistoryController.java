@@ -11,7 +11,6 @@ import points.transforming.app.server.services.history.HistoryService;
 
 @RestController
 @AllArgsConstructor
-@MeasurementExceptionProcessing
 @RequestMapping(path = "history")
 public class HistoryController {
     private final HistoryService historyService;

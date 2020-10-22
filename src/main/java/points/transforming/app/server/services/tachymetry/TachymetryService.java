@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 import org.springframework.data.util.Pair;
@@ -13,19 +14,16 @@ import org.springframework.transaction.annotation.Transactional;
 import points.transforming.app.server.exceptions.tachymetry.ControlNetworkPointsException;
 import points.transforming.app.server.models.measurement.Measurement;
 import points.transforming.app.server.models.picket.Picket;
-import points.transforming.app.server.models.picket.PicketMappers;
+import points.transforming.app.server.models.tachymetry.api.*;
+import points.transforming.app.server.models.tachymetry.polarmethod.TachymetryDto;
+import points.transforming.app.server.services.picket.PicketMappers;
 import points.transforming.app.server.models.tachymetry.MeasuringStation;
 import points.transforming.app.server.models.tachymetry.Tachymetry;
 import points.transforming.app.server.models.tachymetry.TachymetryMappers;
 import points.transforming.app.server.models.tachymetry.TachymetryPicketMeasured;
-import points.transforming.app.server.models.tachymetry.api.MeasuringStationRequest;
-import points.transforming.app.server.models.tachymetry.api.PicketMeasurementDataRequest;
-import points.transforming.app.server.models.tachymetry.api.TachymetryRequest;
 import points.transforming.app.server.models.tachymetry.polarmethod.Azimuth;
-import points.transforming.app.server.models.tachymetry.polarmethod.MeasuringStationDto;
+import points.transforming.app.server.models.tachymetry.polarmethod.MeasuringStationReportDto;
 import points.transforming.app.server.models.tachymetry.polarmethod.PointDto;
-import points.transforming.app.server.repositories.MeasuringStationRepository;
-import points.transforming.app.server.repositories.TachymetryPicketMeasuredRepository;
 import points.transforming.app.server.repositories.TachymetryRepository;
 import points.transforming.app.server.services.picket.CoordinatesConversionService;
 import points.transforming.app.server.services.picket.PicketService;
@@ -37,18 +35,14 @@ public class TachymetryService {
 
     private final MeasurementService measurementService;
     private final PicketService picketService;
-    private final TachymetryValidator tachymetryValidator;
     private final TachymetryRepository tachymetryRepository;
-    private final TachymetryPicketMeasuredRepository tachymetryPicketMeasuredRepository;
-    private final MeasuringStationRepository measuringStationRepository;
     private final CoordinatesConversionService coordinatesConversionService;
 
     @Transactional
-    public List<MeasuringStationDto> calculateTachymetry(final TachymetryRequest tachymetryRequest) {
-        final var calculatedMeasuringStationsDto = new ArrayList<MeasuringStationDto>();
+    public List<MeasuringStationReportDto> calculateTachymetry(final TachymetryRequest tachymetryRequest) {
+        final var calculatedMeasuringStationsDto = new ArrayList<MeasuringStationReportDto>();
         final var calculatedMeasuringStations = new ArrayList<MeasuringStation>();
         final var measurement = measurementService.getMeasurement(tachymetryRequest.getInternalMeasurementId());
-        tachymetryValidator.validateTachymetryRequest(tachymetryRequest);
 
         final var highestPicketInternalId = picketService.getHighestInternalId();
         final var tachymetry = TachymetryMappers.toTachymetry(measurement, tachymetryRequest.getTachymetryMetaData());
@@ -64,9 +58,17 @@ public class TachymetryService {
         return calculatedMeasuringStationsDto;
     }
 
-    private Pair<MeasuringStationDto, MeasuringStation> calculateMeasuringStation(final MeasuringStationRequest measuringStationRequest,
-                                                                                  final Measurement measurement, final AtomicInteger highestPicketInternalId,
-                                                                                  final Tachymetry tachymetry) {
+    public List<TachymetryDto> getTachymetries(final String measurementInternalId) {
+        measurementService.getMeasurement(measurementInternalId);
+        final var tachymetries = tachymetryRepository.findAllByMeasurementInternalId(measurementInternalId);
+        return tachymetries.stream()
+            .map(this::createTachymetryDto)
+            .collect(Collectors.toUnmodifiableList());
+    }
+
+    private Pair<MeasuringStationReportDto, MeasuringStation> calculateMeasuringStation(final MeasuringStationRequest measuringStationRequest,
+                                                                                        final Measurement measurement, final AtomicInteger highestPicketInternalId,
+                                                                                        final Tachymetry tachymetry) {
         final var measuringStation = TachymetryMappers.toMeasuringStation(measuringStationRequest, tachymetry);
         final var startingControlNetworkPoint = PicketMappers.toPicket(measuringStationRequest.getStartingPoint(), measurement,
             "PIC-" + highestPicketInternalId.incrementAndGet());
@@ -74,14 +76,14 @@ public class TachymetryService {
             "PIC-" + highestPicketInternalId.incrementAndGet());
 
         final var startingPointGoogleCoordinates = coordinatesConversionService.convertCoordinateFromGeocentricToWgs84(startingControlNetworkPoint,
-            measurement.getDistrictId());
+            measurement.getDistrict().getZone());
         final var endPointGoogleCoordinates = coordinatesConversionService.convertCoordinateFromGeocentricToWgs84(endControlNetworkPoint,
-            measurement.getDistrictId());
+            measurement.getDistrict().getZone());
 
-        startingControlNetworkPoint.setCoordinateX(startingPointGoogleCoordinates.getCoordinateX().doubleValue());
-        startingControlNetworkPoint.setCoordinateY(startingPointGoogleCoordinates.getCoordinateY().doubleValue());
-        endControlNetworkPoint.setCoordinateX(endPointGoogleCoordinates.getCoordinateX().doubleValue());
-        endControlNetworkPoint.setCoordinateY(endPointGoogleCoordinates.getCoordinateY().doubleValue());
+        startingControlNetworkPoint.setLongitude(startingPointGoogleCoordinates.getCoordinateY().doubleValue());
+        startingControlNetworkPoint.setLatitude(startingPointGoogleCoordinates.getCoordinateX().doubleValue());
+        endControlNetworkPoint.setLongitude(endPointGoogleCoordinates.getCoordinateY().doubleValue());
+        endControlNetworkPoint.setLatitude(endPointGoogleCoordinates.getCoordinateX().doubleValue());
 
         measuringStation.setStartingPointInternalId(startingControlNetworkPoint.getPicketInternalId());
         measuringStation.setEndPointInternalId(endControlNetworkPoint.getPicketInternalId());
@@ -110,9 +112,8 @@ public class TachymetryService {
 
         picketService.savePickets(measuringPicketsToSave);
         measuringStation.setTachymetryPicketsMeasured(tachymetryPickets);
-        measuringStationRepository.save(measuringStation);
 
-        return Pair.of(MeasuringStationDto.builder()
+        return Pair.of(MeasuringStationReportDto.builder()
             .stationName(measuringStationRequest.getStationName())
             .stationNumber(measuringStationRequest.getStationNumber())
             .startingPoint(startingControlNetworkPoint)
@@ -135,10 +136,11 @@ public class TachymetryService {
             measuringStationRequest.getStartingPoint().getCoordinateY(),
             calculateDifferenceCoordinateY(picketMeasurement.getDistance(), picketAzimuth)
         ).doubleValue());
-        final var convertedCoordinates = coordinatesConversionService.convertCoordinateFromGeocentricToWgs84(measuringPicket, measurement.getDistrictId());
+        final var convertedCoordinates = coordinatesConversionService.convertCoordinateFromGeocentricToWgs84(measuringPicket,
+            measurement.getDistrict().getZone());
         measuringPicket.setMeasurement(measurement);
-        measuringPicket.setCoordinateX(convertedCoordinates.getCoordinateX().doubleValue());
-        measuringPicket.setCoordinateY(convertedCoordinates.getCoordinateY().doubleValue());
+        measuringPicket.setLongitude(convertedCoordinates.getCoordinateY().doubleValue());
+        measuringPicket.setLatitude(convertedCoordinates.getCoordinateX().doubleValue());
 
         return measuringPicket;
     }
@@ -158,7 +160,7 @@ public class TachymetryService {
             .subtract(BigDecimal.valueOf(startingControlNetworkPoint.getCoordinateY2000()));
 
         if (differenceX.equals(BigDecimal.valueOf(0.0)) && differenceY.equals(BigDecimal.valueOf(0.0))) {
-            throw new ControlNetworkPointsException(startingControlNetworkPoint.getName(), endControlNetworkPoint.getName());
+            throw new ControlNetworkPointsException(Error.STARTING_AND_ENDING_POINTS_ARE_THE_SAME_PTS300);
         }
 
         return QuarterStrategyBuilder.buildQuarterStrategy(differenceX, differenceY).calculateAzimuth();
@@ -180,10 +182,48 @@ public class TachymetryService {
 
     private TachymetryPicketMeasured createTachymetryPicketData(final AtomicInteger highestPicketInternalId, final MeasuringStation measuringStation,
                                                                 final PicketMeasurementDataRequest picketMeasurement) {
-        final var tachymetryPicketMeasured = TachymetryMappers.toTachymetryPicketMeasured("PIC-" + highestPicketInternalId.incrementAndGet(),
-            picketMeasurement, measuringStation);
-        tachymetryPicketMeasuredRepository.save(tachymetryPicketMeasured);
+        return TachymetryMappers.toTachymetryPicketMeasured("PIC-" + highestPicketInternalId.incrementAndGet(), picketMeasurement,
+            measuringStation);
+    }
 
-        return tachymetryPicketMeasured;
+    private TachymetryDto createTachymetryDto(final Tachymetry tachymetry) {
+        return TachymetryDto.builder()
+            .internalMeasurementId(tachymetry.getMeasurementInternalId())
+            .tachymetryMetaData(TachymetryMetaDataResponse.builder()
+                .tachymetryName(tachymetry.getName())
+                .tachymetrType(tachymetry.getTachymetrType())
+                .temperature(tachymetry.getTemperature())
+                .pressure(tachymetry.getPressure())
+                .build())
+            .measuringStations(tachymetry.getMeasuringStations().stream()
+                .map(this::createMeasuringStationDto)
+                .collect(Collectors.toUnmodifiableList()))
+            .build();
+    }
+
+    private MeasuringStationReportDto createMeasuringStationDto(final MeasuringStation measuringStation) {
+        return MeasuringStationReportDto.builder()
+            .stationName(measuringStation.getStationName())
+            .stationNumber(measuringStation.getStationNumber())
+            .startingPoint(picketService.getPicket(measuringStation.getStartingPointInternalId()))
+            .endPoint(picketService.getPicket(measuringStation.getEndPointInternalId()))
+            .measuringPickets(measuringStation.getTachymetryPicketsMeasured().stream()
+                .map(this::createPointDto)
+                .collect(Collectors.toUnmodifiableList()))
+            .build();
+    }
+
+    private PointDto createPointDto(final TachymetryPicketMeasured tachymetryPicketMeasured) {
+        final var picket = picketService.getPicket(tachymetryPicketMeasured.getPicketInternalId());
+        return PointDto.builder()
+            .name(picket.getName())
+            .calculatedPicket(picket)
+            .distance(BigDecimal.valueOf(tachymetryPicketMeasured.getDistance()))
+            .angle(BigDecimal.valueOf(tachymetryPicketMeasured.getAngle()))
+            .build();
+    }
+
+    enum Error {
+        STARTING_AND_ENDING_POINTS_ARE_THE_SAME_PTS300
     }
 }

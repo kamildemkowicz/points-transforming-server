@@ -10,7 +10,6 @@ import org.mockito.Mockito;
 import points.transforming.app.server.UnitTestWithMockito;
 import points.transforming.app.server.exceptions.MeasurementNotFoundException;
 import points.transforming.app.server.exceptions.tachymetry.ControlNetworkPointsException;
-import points.transforming.app.server.exceptions.tachymetry.EmptyMeasuringStationsListException;
 import points.transforming.app.server.models.picket.Picket;
 import points.transforming.app.server.models.tachymetry.api.TachymetryRequest;
 import points.transforming.app.server.repositories.MeasuringStationRepository;
@@ -35,8 +34,6 @@ public class TachymetryServiceTest {
     @Mock
     private PicketService picketService;
     @Mock
-    private TachymetryValidator tachymetryValidator;
-    @Mock
     private TachymetryRepository tachymetryRepository;
     @Mock
     private TachymetryPicketMeasuredRepository tachymetryPicketMeasuredRepository;
@@ -54,7 +51,7 @@ public class TachymetryServiceTest {
     @Test
     public void shouldThrowMeasurementNotFoundExceptionWhenGetMeasurementThrowsDoesNotExistException() {
         // given
-        doThrow(new MeasurementNotFoundException("notExist")).when(measurementService).getMeasurement(anyString());
+        doThrow(new MeasurementNotFoundException(Error.MEASUREMENT_DOES_NOT_EXIST_PTS100)).when(measurementService).getMeasurement(anyString());
 
         final var tachymetryRequestMock = Mockito.mock(TachymetryRequest.class);
         when(tachymetryRequestMock.getInternalMeasurementId()).thenReturn("notExist");
@@ -63,21 +60,6 @@ public class TachymetryServiceTest {
         assertThatThrownBy(() -> tachymetryService.calculateTachymetry(tachymetryRequestMock))
             .isInstanceOf(MeasurementNotFoundException.class)
             .hasFieldOrPropertyWithValue("measurementId", "notExist");
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenTachymetryDoesNotHaveMeasurementStations() {
-        // given
-        final var measurement = testMeasurementServiceFactory.createValidMeasurement();
-        final var tachymetryRequest = testTachymetryServiceFactory.createValidTachymetryRequest();
-
-        when(measurementService.getMeasurement("MES-1")).thenReturn(measurement);
-        doThrow(new EmptyMeasuringStationsListException("MES-1")).when(tachymetryValidator).validateTachymetryRequest(tachymetryRequest);
-
-        // when then
-        assertThatThrownBy(() -> tachymetryService.calculateTachymetry(tachymetryRequest))
-            .isInstanceOf(EmptyMeasuringStationsListException.class)
-            .hasFieldOrPropertyWithValue("measurementId", "MES-1");
     }
 
     @Test
@@ -146,5 +128,9 @@ public class TachymetryServiceTest {
         verify(measuringStationRepository, times(3)).save(any());
         verify(tachymetryPicketMeasuredRepository, times(9)).save(any());
         verify(coordinatesConversionService, times(15)).convertCoordinateFromGeocentricToWgs84(any(Picket.class), anyInt());
+    }
+
+    enum Error {
+        MEASUREMENT_DOES_NOT_EXIST_PTS100, EMPTY_STATIONS_LIST_PTS301
     }
 }

@@ -1,16 +1,16 @@
 package points.transforming.app.server.exceptions.tachymetry;
 
-public class EmptyMeasuringStationsListException extends RuntimeException {
-    private final String measurementId;
+import org.springframework.http.HttpStatus;
+import points.transforming.app.server.exceptions.PointsTransformingException;
 
-    public EmptyMeasuringStationsListException(final String measurementId) {
-        this.measurementId = measurementId;
+public class EmptyMeasuringStationsListException extends PointsTransformingException {
+
+    public EmptyMeasuringStationsListException(final Enum enumError) {
+        super(enumError);
     }
 
     @Override
-    public String toString() {
-        return "Request to create tachymetry for "
-            + this.measurementId
-            + " has empty measuring stations list.";
+    public HttpStatus getHttpStatus() {
+        return HttpStatus.BAD_REQUEST;
     }
 }

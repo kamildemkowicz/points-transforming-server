@@ -6,19 +6,20 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import points.transforming.app.server.models.tachymetry.api.*;
-import points.transforming.app.server.models.tachymetry.polarmethod.MeasuringStationDto;
+import points.transforming.app.server.models.tachymetry.polarmethod.MeasuringStationReportDto;
+import points.transforming.app.server.models.tachymetry.polarmethod.TachymetryDto;
 
 public class TachymetryResponseProvider {
 
-    public ResponseEntity<TachymetryResponse> doResponse(final String internalMeasurementId,
-                                                         final List<MeasuringStationDto> measuringStations,
-                                                         final TachymetryMetaDataRequest tachymetryMetaData) {
+    public ResponseEntity<TachymetryReportResponse> doResponse(final String internalMeasurementId,
+                                                               final List<MeasuringStationReportDto> measuringStations,
+                                                               final TachymetryMetaDataRequest tachymetryMetaData) {
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .body(TachymetryResponse.builder()
+            .body(TachymetryReportResponse.builder()
                 .internalMeasurementId(internalMeasurementId)
                 .tachymetryMetaData(TachymetryMetaDataResponse.builder()
-                    .tachymetrName(tachymetryMetaData.getTachymetryName())
+                    .tachymetryName(tachymetryMetaData.getTachymetryName())
                     .tachymetrType(tachymetryMetaData.getTachymetrType())
                     .pressure(tachymetryMetaData.getPressure())
                     .temperature(tachymetryMetaData.getTemperature())
@@ -29,6 +30,15 @@ public class TachymetryResponseProvider {
                     .collect(Collectors.toUnmodifiableList())
                 )
                 .build()
+            );
+    }
+
+    public ResponseEntity<List<TachymetryReportResponse>> doResponse(final List<TachymetryDto> tachymetries) {
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(tachymetries.stream()
+                .map(TachymetryReportResponse::of)
+                .collect(Collectors.toUnmodifiableList())
             );
     }
 }

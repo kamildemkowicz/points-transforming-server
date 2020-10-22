@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import points.transforming.app.server.models.measurement.Measurement;
 import points.transforming.app.server.models.picket.Picket;
-import points.transforming.app.server.models.picket.PicketWriteModel;
 import points.transforming.app.server.repositories.PicketRepository;
 
 import java.util.List;
@@ -16,7 +15,11 @@ public class PicketService {
     private final PicketRepository picketRepository;
     private final CoordinatesConversionService coordinatesConversionService;
 
-    public void setPicketInternalIds(List<PicketWriteModel> picketsToSave) {
+    public Picket getPicket(final String picketInternalId) {
+        return picketRepository.getByPicketInternalId(picketInternalId);
+    }
+
+    public void setPicketInternalIds(List<Picket> picketsToSave) {
         var highestMeasurementInternalId = new AtomicInteger(this.picketRepository.getHighestInternalId());
         picketsToSave.forEach(picket -> picket.setPicketInternalId("PIC-" + (highestMeasurementInternalId.incrementAndGet())));
     }
@@ -32,7 +35,7 @@ public class PicketService {
     }
 
     public void savePickets(final List<Picket> pickets) {
-        picketRepository.save(pickets);
+        picketRepository.saveAll(pickets);
     }
 
     public AtomicInteger getHighestInternalId() {
@@ -42,9 +45,9 @@ public class PicketService {
     public void calculateCoordinatesToWgs84(final Measurement measurement) {
         measurement.getPickets().forEach(picket -> {
             if (picket.getCoordinateX2000() != 0 && picket.getCoordinateY2000() != 0) {
-                final var wgs84Coordinates = coordinatesConversionService.convertCoordinateFromGeocentricToWgs84(picket, measurement.getDistrictId());
-                picket.setCoordinateX(wgs84Coordinates.getCoordinateX().doubleValue());
-                picket.setCoordinateY(wgs84Coordinates.getCoordinateY().doubleValue());
+                final var wgs84Coordinates = coordinatesConversionService.convertCoordinateFromGeocentricToWgs84(picket, measurement.getDistrict().getZone());
+                picket.setLongitude(wgs84Coordinates.getCoordinateY().doubleValue());
+                picket.setLatitude(wgs84Coordinates.getCoordinateX().doubleValue());
             }
         });
     }

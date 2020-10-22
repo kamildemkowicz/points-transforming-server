@@ -21,9 +21,9 @@ public class Picket {
     @NotNull
     private String name;
     @NotNull
-    private double coordinateX;
+    private double longitude;
     @NotNull
-    private double coordinateY;
+    private double latitude;
     @Column(name = "coordinate_x_2000")
     private double coordinateX2000;
     @Column(name = "coordinate_y_2000")

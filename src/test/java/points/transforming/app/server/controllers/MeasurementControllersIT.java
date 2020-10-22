@@ -1,30 +1,44 @@
 package points.transforming.app.server.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import points.transforming.app.server.exceptions.report.ViolationReport;
-import points.transforming.app.server.models.measurement.MeasurementReadModel;
-import points.transforming.app.server.models.measurement.MeasurementWriteModel;
-import points.transforming.app.server.models.picket.PicketWriteModel;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import points.transforming.app.server.ControllerTestWithMockito;
+import points.transforming.app.server.exceptions.error.PointsTransformingErrorResponse;
+import points.transforming.app.server.models.measurement.MeasurementResponse;
+import points.transforming.app.server.models.measurement.MeasurementRequest;
+import points.transforming.app.server.models.picket.PicketRequest;
 import points.transforming.app.server.repositories.MeasurementRepository;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ControllerTestWithMockito
 public class MeasurementControllersIT {
     @LocalServerPort
     private int port;
 
     @Autowired
     private TestRestTemplate testRestTemplate;
+
+    @Autowired
+    private MockMvc mockMvc;
 
     @Autowired
     private MeasurementRepository measurementRepository;
@@ -35,8 +49,8 @@ public class MeasurementControllersIT {
         var measurementNumber = this.measurementRepository.findAll().size();
 
         // when
-        ResponseEntity<MeasurementReadModel[]> result= this.testRestTemplate
-                .getForEntity("http://localhost:" + port + "/measurements", MeasurementReadModel[].class);
+        ResponseEntity<MeasurementResponse[]> result= this.testRestTemplate
+                .getForEntity("http://localhost:" + port + "/measurements", MeasurementResponse[].class);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -50,8 +64,8 @@ public class MeasurementControllersIT {
         // given
 
         // when
-        ResponseEntity<MeasurementReadModel[]> result= this.testRestTemplate
-                .getForEntity("http://localhost:" + port + "/measurements?size=10" , MeasurementReadModel[].class);
+        ResponseEntity<MeasurementResponse[]> result= this.testRestTemplate
+                .getForEntity("http://localhost:" + port + "/measurements?size=10" , MeasurementResponse[].class);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -64,8 +78,8 @@ public class MeasurementControllersIT {
         // given
 
         // when
-        ResponseEntity<MeasurementReadModel[]> result= this.testRestTemplate
-                .getForEntity("http://localhost:" + port + "/measurements?size=10&page=2" , MeasurementReadModel[].class);
+        ResponseEntity<MeasurementResponse[]> result= this.testRestTemplate
+                .getForEntity("http://localhost:" + port + "/measurements?size=10&page=2" , MeasurementResponse[].class);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -79,8 +93,8 @@ public class MeasurementControllersIT {
         // given
 
         // when
-        ResponseEntity<MeasurementReadModel[]> result= this.testRestTemplate
-                .getForEntity("http://localhost:" + port + "/measurements?size=10&page=1&sort=place,asc" , MeasurementReadModel[].class);
+        ResponseEntity<MeasurementResponse[]> result= this.testRestTemplate
+                .getForEntity("http://localhost:" + port + "/measurements?size=10&page=1&sort=place,asc" , MeasurementResponse[].class);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -92,85 +106,119 @@ public class MeasurementControllersIT {
     @Test
     public void httpPost_createMeasurement_emptySetOfPickets() {
         // given
-        var measurementWriteModel = new MeasurementWriteModel();
-        measurementWriteModel.setName(UUID.randomUUID().toString());
-        measurementWriteModel.setPlace("Gdansk");
-        measurementWriteModel.setOwner("Kamil Demkowicz");
+        final var measurementRequest = MeasurementRequest.builder()
+            .name(UUID.randomUUID().toString())
+            .owner("Kamil Demkowicz")
+            .place("Gdansk")
+            .districtId(20)
+            .build();
 
         // when
-        ResponseEntity<MeasurementReadModel> result= this.testRestTemplate
+        ResponseEntity<MeasurementResponse> result= this.testRestTemplate
                 .postForEntity(
-                        "http://localhost:" + port + "/measurements",
-                        measurementWriteModel,
-                        MeasurementReadModel.class);
+                    "http://localhost:" + port + "/measurements",
+                    measurementRequest,
+                    MeasurementResponse.class);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     }
 
     @Test
-    public void httpPost_createMeasurementBadRequest_throwException() {
+    public void httpPost_createMeasurementBadRequest_throwException() throws Exception {
         // given
-        var measurementWriteModel = new MeasurementWriteModel();
-        measurementWriteModel.setName("testPlace");
+        final var objectMapper = new ObjectMapper();
+        final var optInBonusCreateRequest = Map.of(
+            "name", "Kamil"
+        );
+
+        final String payload = objectMapper.writeValueAsString(optInBonusCreateRequest);
 
         // when
-        ResponseEntity<ViolationReport[]> result= this.testRestTemplate
-                .postForEntity(
-                        "http://localhost:" + port + "/measurements",
-                        measurementWriteModel,
-                        ViolationReport[].class);
+        final var requestBuilder = buildCreateMeasurementsCall(payload);
 
         // then
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(Objects.requireNonNull(result.getBody()).length).isEqualTo(2);
-        assertThat(result.getBody()[0].getMessage()).isEqualTo("must not be null");
+        this.mockMvc
+            .perform(requestBuilder)
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("errors[0].message", is("Request has invalid data")))
+            .andExpect(jsonPath("errors[0].errorCode", is("PTS002")))
+            .andExpect(jsonPath("errors[0].field", is("owner")))
+            .andExpect(jsonPath("errors[0].reasons[0].message", is("must not be blank")))
+            .andExpect(jsonPath("errors[1].message", is("Request has invalid data")))
+            .andExpect(jsonPath("errors[1].errorCode", is("PTS002")))
+            .andExpect(jsonPath("errors[1].field", is("districtId")))
+            .andExpect(jsonPath("errors[1].reasons[0].message", is("must not be null")))
+            .andExpect(jsonPath("errors[2].message", is("Request has invalid data")))
+            .andExpect(jsonPath("errors[2].errorCode", is("PTS002")))
+            .andExpect(jsonPath("errors[2].field", is("place")))
+            .andExpect(jsonPath("errors[2].reasons[0].message", is("must not be blank")));
     }
 
     @Test
-    public void httpPost_createMeasurementWithoutPlaceAndNameAndOwner_throwExceptions() {
+    public void httpPost_createMeasurementWithoutPlaceAndNameAndOwner_throwExceptions() throws Exception {
         // given
-        var measurementWriteModel = new MeasurementWriteModel();
+        final var objectMapper = new ObjectMapper();
+        final var optInBonusCreateRequest = Map.of();
+
+        final String payload = objectMapper.writeValueAsString(optInBonusCreateRequest);
 
         // when
-        ResponseEntity<ViolationReport[]> result= this.testRestTemplate
-                .postForEntity(
-                        "http://localhost:" + port + "/measurements",
-                        measurementWriteModel,
-                        ViolationReport[].class);
+        final var requestBuilder = buildCreateMeasurementsCall(payload);
 
         // then
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(Objects.requireNonNull(result.getBody()).length).isEqualTo(3);
+        this.mockMvc
+            .perform(requestBuilder)
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("errors[0].message", is("Request has invalid data")))
+            .andExpect(jsonPath("errors[0].errorCode", is("PTS002")))
+            .andExpect(jsonPath("errors[0].field", is("owner")))
+            .andExpect(jsonPath("errors[0].reasons[0].message", is("must not be blank")))
+            .andExpect(jsonPath("errors[1].message", is("Request has invalid data")))
+            .andExpect(jsonPath("errors[1].errorCode", is("PTS002")))
+            .andExpect(jsonPath("errors[1].field", is("districtId")))
+            .andExpect(jsonPath("errors[1].reasons[0].message", is("must not be null")))
+            .andExpect(jsonPath("errors[2].message", is("Request has invalid data")))
+            .andExpect(jsonPath("errors[2].errorCode", is("PTS002")))
+            .andExpect(jsonPath("errors[2].field", is("name")))
+            .andExpect(jsonPath("errors[2].reasons[0].message", is("must not be blank")))
+            .andExpect(jsonPath("errors[3].message", is("Request has invalid data")))
+            .andExpect(jsonPath("errors[3].errorCode", is("PTS002")))
+            .andExpect(jsonPath("errors[3].field", is("place")))
+            .andExpect(jsonPath("errors[3].reasons[0].message", is("must not be blank")));
     }
 
     @Test
     public void httpPost_createMeasurementWithPickets() {
         // given
-        var measurementName = UUID.randomUUID().toString();
-        var time = LocalDateTime.now();
-        var picket1 = new PicketWriteModel();
-        picket1.setName("picket1");
-        picket1.setCoordinateX(40.30);
-        picket1.setCoordinateY(42.30);
+        final var measurementName = UUID.randomUUID().toString();
+        final var time = LocalDateTime.now();
+        final var picket1 = PicketRequest.builder()
+            .name("picket1")
+            .coordinateX2000(40.30)
+            .coordinateY2000(42.30)
+            .build();
 
-        var picket2 = new PicketWriteModel();
-        picket2.setName("picket2");
-        picket2.setCoordinateX(30.30);
-        picket2.setCoordinateY(32.30);
+        final var picket2 = PicketRequest.builder()
+            .name("picket2")
+            .coordinateX2000(30.30)
+            .coordinateY2000(32.30)
+            .build();
 
-        var measurementWriteModel = new MeasurementWriteModel();
-        measurementWriteModel.setName(measurementName);
-        measurementWriteModel.setPlace("Gdansk");
-        measurementWriteModel.setOwner("Kamil Demkowicz");
-        measurementWriteModel.setPickets(List.of(picket1, picket2));
+        final var measurementRequest = MeasurementRequest.builder()
+            .name(measurementName)
+            .place("Gdansk")
+            .owner("Kamil Demkowicz")
+            .districtId(20)
+            .pickets(List.of(picket1, picket2))
+            .build();
 
         // when
-        ResponseEntity<MeasurementReadModel> result= this.testRestTemplate
+        final ResponseEntity<MeasurementResponse> result= this.testRestTemplate
                 .postForEntity(
-                        "http://localhost:" + port + "/measurements",
-                        measurementWriteModel,
-                        MeasurementReadModel.class);
+                    "http://localhost:" + port + "/measurements",
+                    measurementRequest,
+                    MeasurementResponse.class);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -178,6 +226,7 @@ public class MeasurementControllersIT {
         assertThat(result.getBody().getPlace()).isEqualTo("Gdansk");
         assertThat(result.getBody().getName()).isEqualTo(measurementName);
         assertThat(result.getBody().getOwner()).isEqualTo("Kamil Demkowicz");
+        assertThat(result.getBody().getDistrict().getName()).isEqualTo("mysliborski");
         assertThat(result.getBody().getCreationDate()).isNotNull().isAfter(time);
     }
 
@@ -185,17 +234,21 @@ public class MeasurementControllersIT {
     public void httpPost_createMeasurementWithTheSameNameButDifferentInternalIds() {
         // given
         var measurementName = UUID.randomUUID().toString();
-        var measurementWriteModel = new MeasurementWriteModel();
-        measurementWriteModel.setName(measurementName);
-        measurementWriteModel.setPlace("Gdansk");
-        measurementWriteModel.setOwner("Kamil Demkowicz");
+
+        final var measurementRequest = MeasurementRequest.builder()
+            .name(measurementName)
+            .place("Gdansk")
+            .owner("Kamil Demkowicz")
+            .districtId(20)
+            .build();
 
         // when
-        ResponseEntity<MeasurementReadModel> result= this.testRestTemplate
+        final ResponseEntity<MeasurementResponse> result= this.testRestTemplate
                 .postForEntity(
-                        "http://localhost:" + port + "/measurements",
-                        measurementWriteModel,
-                        MeasurementReadModel.class);
+                    "http://localhost:" + port + "/measurements",
+                    measurementRequest,
+                    MeasurementResponse.class);
+
         String measurementInternalId1 = this.measurementRepository
                 .findById(Objects.requireNonNull(result.getBody()).getId())
                 .get()
@@ -205,11 +258,11 @@ public class MeasurementControllersIT {
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         // when
-        ResponseEntity<MeasurementReadModel> result2 = this.testRestTemplate
+        ResponseEntity<MeasurementResponse> result2 = this.testRestTemplate
                 .postForEntity(
-                        "http://localhost:" + port + "/measurements",
-                        measurementWriteModel,
-                        MeasurementReadModel.class);
+                    "http://localhost:" + port + "/measurements",
+                    measurementRequest,
+                    MeasurementResponse.class);
 
         String measurementInternalId2 = this.measurementRepository
                 .findById(Objects.requireNonNull(result2.getBody()).getId())
@@ -226,78 +279,98 @@ public class MeasurementControllersIT {
     public void httpPost_createMeasurementWithDuplicatedPickets_throwDataIntegrityViolationException() {
         // given
         var measurementName = UUID.randomUUID().toString();
-        var picket1 = new PicketWriteModel();
-        picket1.setName("picket1");
-        picket1.setCoordinateX(40.30);
-        picket1.setCoordinateY(42.30);
+        var picket1 = PicketRequest.builder()
+            .name("picket1")
+            .coordinateX2000(40.30)
+            .coordinateY2000(42.30)
+            .build();
 
-        var picket2 = new PicketWriteModel();
-        picket2.setName("picket1");
-        picket2.setCoordinateX(30.30);
-        picket2.setCoordinateY(32.30);
+        var picket2 = PicketRequest.builder()
+            .name("picket1")
+            .coordinateX2000(30.30)
+            .coordinateY2000(32.30)
+            .build();
 
-        var measurementWriteModel = new MeasurementWriteModel();
-        measurementWriteModel.setName(measurementName);
-        measurementWriteModel.setPlace("Gdansk");
-        measurementWriteModel.setOwner("Kamil Demkowicz");
-        measurementWriteModel.setPickets(List.of(picket1, picket2));
+        final var measurementRequest = MeasurementRequest.builder()
+            .name(measurementName)
+            .place("Gdansk")
+            .owner("Kamil Demkowicz")
+            .districtId(20)
+            .pickets(List.of(picket1, picket2))
+            .build();
 
         // when
-        ResponseEntity<ViolationReport> result = this.testRestTemplate
+        ResponseEntity<PointsTransformingErrorResponse> result = this.testRestTemplate
                 .postForEntity(
-                        "http://localhost:" + port + "/measurements",
-                        measurementWriteModel,
-                        ViolationReport.class);
+                    "http://localhost:" + port + "/measurements",
+                    measurementRequest,
+                    PointsTransformingErrorResponse.class);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(Objects.requireNonNull(result.getBody()).getMessage()).isEqualTo("The measurement with given payload already exists!");
-        assertThat(Objects.requireNonNull(result.getBody()).getCause()).containsIgnoringCase("pk_name_measurement_id");
     }
 
     @Test
     public void httpPut_createTwoMeasurementVersions_WithoutChanges() {
         // given
-        var measurementName = UUID.randomUUID().toString();
+        final var measurementName = UUID.randomUUID().toString();
 
-        var picket1 = new PicketWriteModel();
-        picket1.setName("picket1");
-        picket1.setCoordinateX(40.30);
-        picket1.setCoordinateY(42.30);
+        final var picket1 = PicketRequest.builder()
+            .name("picket1")
+            .coordinateX2000(40.30)
+            .coordinateY2000(42.30)
+            .build();
 
-        var picket2 = new PicketWriteModel();
-        picket2.setName("picket2");
-        picket2.setCoordinateX(40.30);
-        picket2.setCoordinateY(42.30);
+        final var picket2 = PicketRequest.builder()
+            .name("picket2")
+            .coordinateX2000(40.30)
+            .coordinateY2000(42.30)
+            .build();
+
+        final var measurementRequest = MeasurementRequest.builder()
+            .name(measurementName)
+            .place("Gdansk")
+            .owner("Kamil Demkowicz")
+            .districtId(20)
+            .pickets(List.of(picket1, picket2))
+            .build();
 
         // when
-        ResponseEntity<MeasurementReadModel> result = this.testRestTemplate
+        final ResponseEntity<MeasurementResponse> result = this.testRestTemplate
                 .postForEntity(
-                        "http://localhost:" + port + "/measurements",
-                        this.createNewMeasurementRequestBody(measurementName, List.of(picket1, picket2)),
-                        MeasurementReadModel.class);
+                    "http://localhost:" + port + "/measurements",
+                    measurementRequest,
+                    MeasurementResponse.class);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         // given
-        var picket1_2 = new PicketWriteModel();
-        picket1_2.setPicketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(0).getPicketInternalId());
-        picket1_2.setName("picket1");
-        picket1_2.setCoordinateX(40.30);
-        picket1_2.setCoordinateY(42.30);
+        final var picket1_2 = PicketRequest.builder()
+            .name("picket1")
+            .coordinateX2000(40.30)
+            .coordinateY2000(42.30)
+            .build();
 
-        var picket2_2 = new PicketWriteModel();
-        picket2_2.setPicketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(1).getPicketInternalId());
-        picket2_2.setName("picket2");
-        picket2_2.setCoordinateX(40.30);
-        picket2_2.setCoordinateY(42.30);
+        final var picket2_2 = PicketRequest.builder()
+            .name("picket2")
+            .coordinateX2000(40.30)
+            .coordinateY2000(42.30)
+            .build();
+
+        final var measurementRequest2 = MeasurementRequest.builder()
+            .name(measurementName)
+            .place("Gdansk")
+            .owner("Kamil Demkowicz")
+            .districtId(20)
+            .pickets(List.of(picket1_2, picket2_2))
+            .build();
 
         // when
-        ResponseEntity<MeasurementReadModel> result2 = this.testRestTemplate
-                .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getMeasurementInternalId(),
-                        this.createNewMeasurementRequestBody(measurementName, List.of(picket1_2, picket2_2)),
-                        MeasurementReadModel.class
+        ResponseEntity<MeasurementResponse> result2 = this.testRestTemplate
+            .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getMeasurementInternalId(),
+                measurementRequest2,
+                MeasurementResponse.class
         );
 
         // then
@@ -312,8 +385,8 @@ public class MeasurementControllersIT {
         assertThat(result.getBody().getPickets().get(0).getPicketInternalId()).isEqualTo(Objects.requireNonNull(result2.getBody()).getPickets().get(0).getPicketInternalId());
         assertThat(result.getBody().getPickets().get(1).getPicketInternalId()).isEqualTo(Objects.requireNonNull(result2.getBody()).getPickets().get(1).getPicketInternalId());
         assertThat(result.getBody().getPickets().get(0).getName()).isEqualTo(Objects.requireNonNull(result2.getBody()).getPickets().get(0).getName());
-        assertThat(result.getBody().getPickets().get(0).getCoordinateX()).isEqualTo(Objects.requireNonNull(result2.getBody()).getPickets().get(0).getCoordinateX());
-        assertThat(result.getBody().getPickets().get(0).getCoordinateY()).isEqualTo(Objects.requireNonNull(result2.getBody()).getPickets().get(0).getCoordinateY());
+        assertThat(result.getBody().getPickets().get(0).getLatitude()).isEqualTo(Objects.requireNonNull(result2.getBody()).getPickets().get(0).getLatitude());
+        assertThat(result.getBody().getPickets().get(0).getLongitude()).isEqualTo(Objects.requireNonNull(result2.getBody()).getPickets().get(0).getLongitude());
     }
 
     @Test
@@ -322,27 +395,29 @@ public class MeasurementControllersIT {
         var measurementName = UUID.randomUUID().toString();
 
         // when
-        ResponseEntity<MeasurementReadModel> result = this.testRestTemplate
+        ResponseEntity<MeasurementResponse> result = this.testRestTemplate
                 .postForEntity(
                         "http://localhost:" + port + "/measurements",
                         this.createNewMeasurementRequestBody(measurementName, List.of()),
-                        MeasurementReadModel.class);
+                        MeasurementResponse.class);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         // given
-        var measurementRequestBody = new MeasurementWriteModel();
-        measurementRequestBody.setOwner("Mariusz Kaczmarek");
-        measurementRequestBody.setName("nowaNazwa");
-        measurementRequestBody.setPlace("Zielona Góra");
+        final var measurementRequest = MeasurementRequest.builder()
+            .name("nowaNazwa")
+            .place("Zielona Góra")
+            .owner("Mariusz Kaczmarek")
+            .districtId(20)
+            .build();
 
         // when
-        ResponseEntity<MeasurementReadModel> result2 = this.testRestTemplate
-                .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getMeasurementInternalId(),
-                        measurementRequestBody,
-                        MeasurementReadModel.class
-                );
+        ResponseEntity<MeasurementResponse> result2 = this.testRestTemplate
+            .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getMeasurementInternalId(),
+                measurementRequest,
+                MeasurementResponse.class
+            );
 
         // then
         assertThat(result2.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -365,27 +440,28 @@ public class MeasurementControllersIT {
         var measurementName = UUID.randomUUID().toString();
 
         // when
-        ResponseEntity<MeasurementReadModel> result = this.testRestTemplate
+        ResponseEntity<MeasurementResponse> result = this.testRestTemplate
                 .postForEntity(
-                        "http://localhost:" + port + "/measurements",
-                        this.createNewMeasurementRequestBody(measurementName, List.of()),
-                        MeasurementReadModel.class);
+                    "http://localhost:" + port + "/measurements",
+                    this.createNewMeasurementRequestBody(measurementName, List.of()),
+                    MeasurementResponse.class);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         // given
-        var picketWriteModel = new PicketWriteModel();
-        picketWriteModel.setCoordinateX(30);
-        picketWriteModel.setCoordinateY(40);
-        picketWriteModel.setName("NowaPikieta");
+        final var picketRequest = PicketRequest.builder()
+            .name("NowaPikieta")
+            .latitude(30)
+            .longitude(40)
+            .build();
 
         // when
-        ResponseEntity<MeasurementReadModel> result2 = this.testRestTemplate
-                .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getMeasurementInternalId(),
-                        this.createNewMeasurementRequestBody(measurementName, List.of(picketWriteModel)),
-                        MeasurementReadModel.class
-                );
+        ResponseEntity<MeasurementResponse> result2 = this.testRestTemplate
+            .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getMeasurementInternalId(),
+                this.createNewMeasurementRequestBody(measurementName, List.of(picketRequest)),
+                MeasurementResponse.class
+            );
 
         // then
         assertThat(result2.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -403,44 +479,54 @@ public class MeasurementControllersIT {
         // given
         var measurementName = UUID.randomUUID().toString();
 
-        var picketWriteModel1 = new PicketWriteModel();
-        picketWriteModel1.setCoordinateX(1);
-        picketWriteModel1.setCoordinateY(2);
-        picketWriteModel1.setName("Picket1");
+        final var picketRequest1 = PicketRequest.builder()
+            .name("Picket1")
+            .coordinateX2000(1)
+            .coordinateY2000(2)
+            .build();
 
-        var picketWriteModel2 = new PicketWriteModel();
-        picketWriteModel2.setCoordinateX(3);
-        picketWriteModel2.setCoordinateY(4);
-        picketWriteModel2.setName("Picket2");
+        final var picketRequest2 = PicketRequest.builder()
+            .name("Picket2")
+            .coordinateX2000(3)
+            .coordinateY2000(4)
+            .build();
 
         // when
-        ResponseEntity<MeasurementReadModel> result = this.testRestTemplate
+        ResponseEntity<MeasurementResponse> result = this.testRestTemplate
                 .postForEntity(
-                        "http://localhost:" + port + "/measurements",
-                        this.createNewMeasurementRequestBody(measurementName, List.of(picketWriteModel1, picketWriteModel2)),
-                        MeasurementReadModel.class);
+                    "http://localhost:" + port + "/measurements",
+                    this.createNewMeasurementRequestBody(measurementName, List.of(picketRequest1, picketRequest2)),
+                    MeasurementResponse.class);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         // given
-        picketWriteModel1.setPicketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(0).getPicketInternalId());
-        picketWriteModel1.setCoordinateX(2);
-        picketWriteModel1.setCoordinateY(10);
-        picketWriteModel1.setName("Picket10");
+        final var picketRequest1_2 = PicketRequest.builder()
+            .name("Picket10")
+            .coordinateX2000(2)
+            .coordinateY2000(10)
+            .picketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(0).getPicketInternalId())
+            .build();
 
-        picketWriteModel2.setPicketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(1).getPicketInternalId());
+        final var picketRequest2_2 = PicketRequest.builder()
+            .name("Picket2")
+            .coordinateX2000(3)
+            .coordinateY2000(4)
+            .picketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(1).getPicketInternalId())
+            .build();
 
-        var picketWriteModel = new PicketWriteModel();
-        picketWriteModel.setCoordinateX(30);
-        picketWriteModel.setCoordinateY(40);
-        picketWriteModel.setName("NowaPikieta");
+        final var picketRequest = PicketRequest.builder()
+            .name("NowaPikieta")
+            .latitude(30)
+            .longitude(40)
+            .build();
 
         // when
-        ResponseEntity<MeasurementReadModel> result2 = this.testRestTemplate
+        ResponseEntity<MeasurementResponse> result2 = this.testRestTemplate
                 .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getMeasurementInternalId(),
-                        this.createNewMeasurementRequestBody(measurementName, List.of(picketWriteModel1, picketWriteModel2, picketWriteModel)),
-                        MeasurementReadModel.class
+                    this.createNewMeasurementRequestBody(measurementName, List.of(picketRequest1_2, picketRequest2_2, picketRequest)),
+                    MeasurementResponse.class
                 );
 
         // then
@@ -452,13 +538,13 @@ public class MeasurementControllersIT {
         assertThat(result.getBody().getPickets().get(0).getPicketInternalId()).isEqualTo(result2.getBody().getPickets().get(0).getPicketInternalId());
         assertThat(result.getBody().getPickets().get(0).getId()).isNotEqualTo(result2.getBody().getPickets().get(0).getId());
         assertThat(result.getBody().getPickets().get(0).getName()).isNotEqualTo(result2.getBody().getPickets().get(0).getName());
-        assertThat(result.getBody().getPickets().get(0).getCoordinateX()).isNotEqualTo(result2.getBody().getPickets().get(0).getCoordinateX());
-        assertThat(result.getBody().getPickets().get(0).getCoordinateY()).isNotEqualTo(result2.getBody().getPickets().get(0).getCoordinateY());
+        assertThat(result.getBody().getPickets().get(0).getLatitude()).isNotEqualTo(result2.getBody().getPickets().get(0).getLatitude());
+        assertThat(result.getBody().getPickets().get(0).getLongitude()).isNotEqualTo(result2.getBody().getPickets().get(0).getLongitude());
 
         assertThat(result.getBody().getPickets().get(0).getPicketInternalId()).isNotEqualTo(result2.getBody().getPickets().get(2).getPicketInternalId());
         assertThat(result2.getBody().getPickets().get(2).getName()).isEqualTo("NowaPikieta");
-        assertThat(result2.getBody().getPickets().get(2).getCoordinateY()).isEqualTo(40);
-        assertThat(result2.getBody().getPickets().get(2).getCoordinateX()).isEqualTo(30);
+        assertThat(result2.getBody().getPickets().get(2).getLongitude()).isEqualTo(40);
+        assertThat(result2.getBody().getPickets().get(2).getLatitude()).isEqualTo(30);
     }
 
     @Test
@@ -466,44 +552,47 @@ public class MeasurementControllersIT {
         // given
         var measurementName = UUID.randomUUID().toString();
 
-        var picketWriteModel1 = new PicketWriteModel();
-        picketWriteModel1.setCoordinateX(1);
-        picketWriteModel1.setCoordinateY(2);
-        picketWriteModel1.setName("Picket1");
+        final var picketRequest1 = PicketRequest.builder()
+            .name("Picket1")
+            .coordinateX2000(1)
+            .coordinateY2000(2)
+            .build();
 
-        var picketWriteModel2 = new PicketWriteModel();
-        picketWriteModel2.setCoordinateX(3);
-        picketWriteModel2.setCoordinateY(4);
-        picketWriteModel2.setName("Picket2");
+        final var picketRequest2 = PicketRequest.builder()
+            .name("Picket2")
+            .coordinateX2000(3)
+            .coordinateY2000(4)
+            .build();
 
         // when
-        ResponseEntity<MeasurementReadModel> result = this.testRestTemplate
+        ResponseEntity<MeasurementResponse> result = this.testRestTemplate
                 .postForEntity(
-                        "http://localhost:" + port + "/measurements",
-                        this.createNewMeasurementRequestBody(measurementName, List.of(picketWriteModel1, picketWriteModel2)),
-                        MeasurementReadModel.class);
+                    "http://localhost:" + port + "/measurements",
+                    this.createNewMeasurementRequestBody(measurementName, List.of(picketRequest1, picketRequest2)),
+                    MeasurementResponse.class);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         // given
-        picketWriteModel1.setPicketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(0).getPicketInternalId());
-        picketWriteModel1.setCoordinateX(2);
-        picketWriteModel1.setCoordinateY(10);
-        picketWriteModel1.setName("Picket10");
+        final var picketRequest1_2 = PicketRequest.builder()
+            .name("Picket10")
+            .coordinateX2000(2)
+            .coordinateY2000(10)
+            .picketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(0).getPicketInternalId())
+            .build();
 
-        picketWriteModel2.setPicketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(1).getPicketInternalId());
-
-        var picketWriteModel = new PicketWriteModel();
-        picketWriteModel.setCoordinateX(30);
-        picketWriteModel.setCoordinateY(40);
-        picketWriteModel.setName("Picket2");
+        final var picketRequest = PicketRequest.builder()
+            .name("Picket2")
+            .latitude(30)
+            .longitude(40)
+            .build();
 
         // when
-        ResponseEntity<MeasurementReadModel> result2 = this.testRestTemplate
+        ResponseEntity<MeasurementResponse> result2 = this.testRestTemplate
                 .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getMeasurementInternalId(),
-                        this.createNewMeasurementRequestBody(measurementName, List.of(picketWriteModel1, picketWriteModel)),
-                        MeasurementReadModel.class
+                    this.createNewMeasurementRequestBody(measurementName, List.of(picketRequest1_2, picketRequest)),
+                    MeasurementResponse.class
                 );
 
         // then
@@ -515,13 +604,13 @@ public class MeasurementControllersIT {
         assertThat(result.getBody().getPickets().get(0).getPicketInternalId()).isEqualTo(result2.getBody().getPickets().get(0).getPicketInternalId());
         assertThat(result.getBody().getPickets().get(0).getId()).isNotEqualTo(result2.getBody().getPickets().get(0).getId());
         assertThat(result.getBody().getPickets().get(0).getName()).isNotEqualTo(result2.getBody().getPickets().get(0).getName());
-        assertThat(result.getBody().getPickets().get(0).getCoordinateX()).isNotEqualTo(result2.getBody().getPickets().get(0).getCoordinateX());
-        assertThat(result.getBody().getPickets().get(0).getCoordinateY()).isNotEqualTo(result2.getBody().getPickets().get(0).getCoordinateY());
+        assertThat(result.getBody().getPickets().get(0).getLatitude()).isNotEqualTo(result2.getBody().getPickets().get(0).getLatitude());
+        assertThat(result.getBody().getPickets().get(0).getLongitude()).isNotEqualTo(result2.getBody().getPickets().get(0).getLongitude());
 
         assertThat(result.getBody().getPickets().get(0).getPicketInternalId()).isNotEqualTo(result2.getBody().getPickets().get(1).getPicketInternalId());
         assertThat(result2.getBody().getPickets().get(1).getName()).isEqualTo("Picket2");
-        assertThat(result2.getBody().getPickets().get(1).getCoordinateY()).isEqualTo(40);
-        assertThat(result2.getBody().getPickets().get(1).getCoordinateX()).isEqualTo(30);
+        assertThat(result2.getBody().getPickets().get(1).getLongitude()).isEqualTo(40);
+        assertThat(result2.getBody().getPickets().get(1).getLatitude()).isEqualTo(30);
     }
 
     @Test
@@ -529,59 +618,73 @@ public class MeasurementControllersIT {
         // given
         var measurementName = UUID.randomUUID().toString();
 
-        var picketWriteModel1 = new PicketWriteModel();
-        picketWriteModel1.setCoordinateX(1);
-        picketWriteModel1.setCoordinateY(2);
-        picketWriteModel1.setName("Picket1");
+        final var picketRequest1 = PicketRequest.builder()
+            .name("Picket1")
+            .coordinateX2000(1)
+            .coordinateY2000(2)
+            .build();
 
-        var picketWriteModel2 = new PicketWriteModel();
-        picketWriteModel2.setCoordinateX(3);
-        picketWriteModel2.setCoordinateY(4);
-        picketWriteModel2.setName("Picket2");
+        final var picketRequest2 = PicketRequest.builder()
+            .name("Picket2")
+            .coordinateX2000(3)
+            .coordinateY2000(4)
+            .build();
 
         // when
-        ResponseEntity<MeasurementReadModel> result = this.testRestTemplate
-                .postForEntity(
-                        "http://localhost:" + port + "/measurements",
-                        this.createNewMeasurementRequestBody(measurementName, List.of(picketWriteModel1, picketWriteModel2)),
-                        MeasurementReadModel.class);
+        ResponseEntity<MeasurementResponse> result = this.testRestTemplate
+                .postForEntity("http://localhost:" + port + "/measurements",
+                    this.createNewMeasurementRequestBody(measurementName, List.of(picketRequest1, picketRequest2)),
+                    MeasurementResponse.class);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         // given
-        picketWriteModel1.setPicketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(0).getPicketInternalId());
-        picketWriteModel1.setCoordinateX(2);
-        picketWriteModel1.setCoordinateY(10);
-        picketWriteModel1.setName("Picket10");
+        final var picketRequest1_2 = PicketRequest.builder()
+            .name("Picket10")
+            .coordinateX2000(2)
+            .coordinateY2000(10)
+            .picketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(0).getPicketInternalId())
+            .build();
 
-        picketWriteModel2.setPicketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(1).getPicketInternalId());
+        final var picketRequest2_2 = PicketRequest.builder()
+            .name("Picket2")
+            .coordinateX2000(3)
+            .coordinateY2000(4)
+            .picketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(1).getPicketInternalId())
+            .build();
 
-        var picketWriteModel = new PicketWriteModel();
-        picketWriteModel.setCoordinateX(30);
-        picketWriteModel.setCoordinateY(40);
-        picketWriteModel.setName("Picket2");
+        final var picketRequest = PicketRequest.builder()
+            .name("Picket2")
+            .latitude(30)
+            .longitude(40)
+            .build();
 
         // when
-        ResponseEntity<ViolationReport> result2 = this.testRestTemplate
+        ResponseEntity<PointsTransformingErrorResponse> result2 = this.testRestTemplate
                 .postForEntity("http://localhost:" + port + "/measurements/" + Objects.requireNonNull(result.getBody()).getMeasurementInternalId(),
-                        this.createNewMeasurementRequestBody(measurementName, List.of(picketWriteModel1, picketWriteModel2, picketWriteModel)),
-                        ViolationReport.class
+                    this.createNewMeasurementRequestBody(measurementName, List.of(picketRequest1_2, picketRequest2_2, picketRequest)),
+                    PointsTransformingErrorResponse.class
                 );
 
         // then
         assertThat(result2.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(Objects.requireNonNull(result2.getBody()).getMessage()).isEqualTo("The measurement with given payload already exists!");
-        assertThat(Objects.requireNonNull(result2.getBody()).getCause()).containsIgnoringCase("pk_name_measurement_id");
     }
 
-    private MeasurementWriteModel createNewMeasurementRequestBody(String name, List<PicketWriteModel> pickets) {
-        var measurementRequest = new MeasurementWriteModel();
-        measurementRequest.setName(name);
-        measurementRequest.setPlace("Gdansk");
-        measurementRequest.setOwner("Kamil Demkowicz");
-        measurementRequest.setPickets(pickets);
+    private MeasurementRequest createNewMeasurementRequestBody(String name, List<PicketRequest> pickets) {
+        return MeasurementRequest.builder()
+            .name(name)
+            .place("Gdansk")
+            .owner("Kamil Demkowicz")
+            .districtId(20)
+            .pickets(pickets)
+            .build();
+    }
 
-        return measurementRequest;
+    private MockHttpServletRequestBuilder buildCreateMeasurementsCall(final String payload) {
+        return MockMvcRequestBuilders.post("http://localhost:" + port + "/measurements")
+            .content(payload)
+            .contentType(APPLICATION_JSON_VALUE)
+            .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
     }
 }

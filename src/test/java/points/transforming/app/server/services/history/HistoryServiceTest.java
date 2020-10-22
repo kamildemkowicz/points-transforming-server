@@ -382,15 +382,15 @@ public class HistoryServiceTest {
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(0).getLabel()).isEqualTo("name");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(1).getOldValue())
-            .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1Old.getCoordinateX()).setScale(2, RoundingMode.CEILING)));
+            .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1Old.getLongitude()).setScale(2, RoundingMode.CEILING)));
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(1).getNewValue())
-            .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1New.getCoordinateX()).setScale(2, RoundingMode.CEILING)));
-        assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(1).getLabel()).isEqualTo("coordinate X");
+            .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1New.getLongitude()).setScale(2, RoundingMode.CEILING)));
+        assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(1).getLabel()).isEqualTo("longitude");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(2).getOldValue())
-            .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1Old.getCoordinateY()).setScale(2, RoundingMode.CEILING)));
+            .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1Old.getLatitude()).setScale(2, RoundingMode.CEILING)));
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(2).getNewValue())
-            .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1New.getCoordinateY()).setScale(2, RoundingMode.CEILING)));
-        assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(2).getLabel()).isEqualTo("coordinate Y");
+            .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1New.getLatitude()).setScale(2, RoundingMode.CEILING)));
+        assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(2).getLabel()).isEqualTo("latitude");
     }
 }

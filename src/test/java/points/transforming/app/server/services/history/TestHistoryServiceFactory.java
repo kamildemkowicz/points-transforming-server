@@ -16,8 +16,8 @@ public class TestHistoryServiceFactory {
         final var picket = new Picket();
 
         picket.setName("picket" + picketNumber);
-        picket.setCoordinateX(100 * random.nextDouble());
-        picket.setCoordinateY(100 * random.nextDouble());
+        picket.setLongitude(100 * random.nextDouble());
+        picket.setLatitude(100 * random.nextDouble());
         picket.setPicketInternalId("PIC-" + picketNumber);
         picket.setMeasurement(measurement);
 

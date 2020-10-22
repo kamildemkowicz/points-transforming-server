@@ -20,7 +20,8 @@ public class TachymetryPicketMeasured {
     @Positive
     private Double distance;
 
-    @NotBlank
+    @NotNull
+    @Positive
     private Double angle;
 
     @ManyToOne
