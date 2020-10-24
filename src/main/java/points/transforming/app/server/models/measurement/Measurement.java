@@ -6,8 +6,6 @@ import points.transforming.app.server.models.picket.Picket;
 import points.transforming.app.server.models.user.User;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,15 +16,12 @@ import java.util.List;
 public class Measurement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private int id;
+    private Integer id;
 
-    @NotNull
     private String measurementInternalId;
 
-    @NotNull
-    private int version;
+    private Integer version;
 
-    @NotNull
     private String name;
 
     @DateTimeFormat(pattern = "yyyy-MM-ddTHH:mm:ss")
@@ -35,10 +30,8 @@ public class Measurement {
     @DateTimeFormat(pattern = "yyyy-MM-ddTHH:mm:ss")
     private LocalDateTime endDate;
 
-    @NotNull
     private String place;
 
-    @NotNull
     private String owner;
 
     @ManyToOne

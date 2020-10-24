@@ -1,10 +1,8 @@
 package points.transforming.app.server.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
@@ -15,8 +13,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import points.transforming.app.server.ControllerTestWithMockito;
 import points.transforming.app.server.exceptions.error.PointsTransformingErrorResponse;
-import points.transforming.app.server.models.measurement.MeasurementResponse;
-import points.transforming.app.server.models.measurement.MeasurementRequest;
+import points.transforming.app.server.models.measurement.api.MeasurementResponse;
+import points.transforming.app.server.models.measurement.api.MeasurementRequest;
 import points.transforming.app.server.models.picket.PicketRequest;
 import points.transforming.app.server.repositories.MeasurementRepository;
 
@@ -452,8 +450,8 @@ public class MeasurementControllersIT {
         // given
         final var picketRequest = PicketRequest.builder()
             .name("NowaPikieta")
-            .latitude(30)
-            .longitude(40)
+            .latitude(30.)
+            .longitude(40.)
             .build();
 
         // when
@@ -481,14 +479,14 @@ public class MeasurementControllersIT {
 
         final var picketRequest1 = PicketRequest.builder()
             .name("Picket1")
-            .coordinateX2000(1)
-            .coordinateY2000(2)
+            .coordinateX2000(1.)
+            .coordinateY2000(2.)
             .build();
 
         final var picketRequest2 = PicketRequest.builder()
             .name("Picket2")
-            .coordinateX2000(3)
-            .coordinateY2000(4)
+            .coordinateX2000(3.)
+            .coordinateY2000(4.)
             .build();
 
         // when
@@ -504,22 +502,22 @@ public class MeasurementControllersIT {
         // given
         final var picketRequest1_2 = PicketRequest.builder()
             .name("Picket10")
-            .coordinateX2000(2)
-            .coordinateY2000(10)
+            .coordinateX2000(2.)
+            .coordinateY2000(10.)
             .picketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(0).getPicketInternalId())
             .build();
 
         final var picketRequest2_2 = PicketRequest.builder()
             .name("Picket2")
-            .coordinateX2000(3)
-            .coordinateY2000(4)
+            .coordinateX2000(3.)
+            .coordinateY2000(4.)
             .picketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(1).getPicketInternalId())
             .build();
 
         final var picketRequest = PicketRequest.builder()
             .name("NowaPikieta")
-            .latitude(30)
-            .longitude(40)
+            .latitude(30.)
+            .longitude(40.)
             .build();
 
         // when
@@ -554,14 +552,14 @@ public class MeasurementControllersIT {
 
         final var picketRequest1 = PicketRequest.builder()
             .name("Picket1")
-            .coordinateX2000(1)
-            .coordinateY2000(2)
+            .coordinateX2000(1.)
+            .coordinateY2000(2.)
             .build();
 
         final var picketRequest2 = PicketRequest.builder()
             .name("Picket2")
-            .coordinateX2000(3)
-            .coordinateY2000(4)
+            .coordinateX2000(3.)
+            .coordinateY2000(4.)
             .build();
 
         // when
@@ -577,15 +575,15 @@ public class MeasurementControllersIT {
         // given
         final var picketRequest1_2 = PicketRequest.builder()
             .name("Picket10")
-            .coordinateX2000(2)
-            .coordinateY2000(10)
+            .coordinateX2000(2.)
+            .coordinateY2000(10.)
             .picketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(0).getPicketInternalId())
             .build();
 
         final var picketRequest = PicketRequest.builder()
             .name("Picket2")
-            .latitude(30)
-            .longitude(40)
+            .latitude(30.)
+            .longitude(40.)
             .build();
 
         // when
@@ -620,14 +618,14 @@ public class MeasurementControllersIT {
 
         final var picketRequest1 = PicketRequest.builder()
             .name("Picket1")
-            .coordinateX2000(1)
-            .coordinateY2000(2)
+            .coordinateX2000(1.)
+            .coordinateY2000(2.)
             .build();
 
         final var picketRequest2 = PicketRequest.builder()
             .name("Picket2")
-            .coordinateX2000(3)
-            .coordinateY2000(4)
+            .coordinateX2000(3.)
+            .coordinateY2000(4.)
             .build();
 
         // when
@@ -642,22 +640,22 @@ public class MeasurementControllersIT {
         // given
         final var picketRequest1_2 = PicketRequest.builder()
             .name("Picket10")
-            .coordinateX2000(2)
-            .coordinateY2000(10)
+            .coordinateX2000(2.)
+            .coordinateY2000(10.)
             .picketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(0).getPicketInternalId())
             .build();
 
         final var picketRequest2_2 = PicketRequest.builder()
             .name("Picket2")
-            .coordinateX2000(3)
-            .coordinateY2000(4)
+            .coordinateX2000(3.)
+            .coordinateY2000(4.)
             .picketInternalId(Objects.requireNonNull(result.getBody()).getPickets().get(1).getPicketInternalId())
             .build();
 
         final var picketRequest = PicketRequest.builder()
             .name("Picket2")
-            .latitude(30)
-            .longitude(40)
+            .latitude(30.)
+            .longitude(40.)
             .build();
 
         // when

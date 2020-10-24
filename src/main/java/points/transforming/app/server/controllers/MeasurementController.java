@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import points.transforming.app.server.models.measurement.MeasurementResponse;
-import points.transforming.app.server.models.measurement.MeasurementRequest;
+import points.transforming.app.server.models.measurement.api.MeasurementResponse;
+import points.transforming.app.server.models.measurement.api.MeasurementRequest;
 import points.transforming.app.server.services.measurement.CreateMeasurementResponseProvider;
 import points.transforming.app.server.services.measurement.MeasurementResponseProvider;
 import points.transforming.app.server.services.measurement.MeasurementService;
@@ -43,7 +43,7 @@ public class MeasurementController {
         return new CreateMeasurementResponseProvider().doResponse(measurementService.createMeasurement(measurementRequest));
     }
 
-    @PutMapping(value = "/{internalMeasurementId}")
+    @PostMapping(value = "/{internalMeasurementId}")
     public ResponseEntity<MeasurementResponse> updateMeasurement(@PathVariable final String internalMeasurementId,
                                                                  @RequestBody @Valid final MeasurementRequest measurementRequest) {
         return new CreateMeasurementResponseProvider().doResponse(measurementService.updateMeasurement(internalMeasurementId, measurementRequest));

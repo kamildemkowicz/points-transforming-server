@@ -6,7 +6,6 @@ import lombok.Setter;
 import points.transforming.app.server.models.measurement.Measurement;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
 @Entity
 @Getter
@@ -16,18 +15,14 @@ public class Picket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @NotNull
     private String picketInternalId;
-    @NotNull
     private String name;
-    @NotNull
-    private double longitude;
-    @NotNull
-    private double latitude;
+    private Double longitude;
+    private Double latitude;
     @Column(name = "coordinate_x_2000")
-    private double coordinateX2000;
+    private Double coordinateX2000;
     @Column(name = "coordinate_y_2000")
-    private double coordinateY2000;
+    private Double coordinateY2000;
 
     @ManyToOne
     @JoinColumn(name = "measurement_id")

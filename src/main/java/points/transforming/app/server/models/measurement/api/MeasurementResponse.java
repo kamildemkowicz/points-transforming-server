@@ -1,8 +1,8 @@
-package points.transforming.app.server.models.measurement;
+package points.transforming.app.server.models.measurement.api;
 
 import lombok.Builder;
 import lombok.Getter;
-import points.transforming.app.server.models.measurement.api.DistrictResponse;
+import points.transforming.app.server.models.measurement.Measurement;
 import points.transforming.app.server.models.picket.PicketResponse;
 
 import java.time.LocalDateTime;

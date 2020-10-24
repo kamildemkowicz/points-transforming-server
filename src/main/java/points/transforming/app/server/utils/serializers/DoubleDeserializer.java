@@ -16,7 +16,7 @@ public class DoubleDeserializer extends JsonDeserializer<Double> {
         } catch (final IOException e) {
             throw ExceptionUtils.throwsPointsTransformingIOExceptionWhenObjectIsWrongDeseralizable("Only Double values are allowed",
                 p.currentName(),
-                p.getParsingContext().getCurrentValue().getClass(),
+                p.getParsingContext().getClass(),
                 Double.class);
         }
     }
