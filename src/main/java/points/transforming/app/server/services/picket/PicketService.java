@@ -7,6 +7,7 @@ import points.transforming.app.server.models.picket.Picket;
 import points.transforming.app.server.repositories.PicketRepository;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -44,7 +45,7 @@ public class PicketService {
 
     public void calculateCoordinatesToWgs84(final Measurement measurement) {
         measurement.getPickets().forEach(picket -> {
-            if (picket.getCoordinateX2000() != 0 && picket.getCoordinateY2000() != 0) {
+            if (!Objects.isNull(picket.getCoordinateX2000()) && !Objects.isNull(picket.getCoordinateY2000())) {
                 final var wgs84Coordinates = coordinatesConversionService.convertCoordinateFromGeocentricToWgs84(picket, measurement.getDistrict().getZone());
                 picket.setLongitude(wgs84Coordinates.getCoordinateY().doubleValue());
                 picket.setLatitude(wgs84Coordinates.getCoordinateX().doubleValue());

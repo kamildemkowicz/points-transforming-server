@@ -33,5 +33,5 @@ public class MeasurementRequest {
     private final List<PicketRequest> pickets = new ArrayList<>();
 
     @Builder.Default
-    private final List<GeodeticObjectRequest> geodeticObjectRequests = new ArrayList<>();
+    private final List<GeodeticObjectRequest> geodeticObjects = new ArrayList<>();
 }

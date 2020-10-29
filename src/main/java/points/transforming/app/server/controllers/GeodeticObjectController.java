@@ -4,11 +4,9 @@ import java.util.List;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import points.transforming.app.server.models.geodeticobject.GeodeticObject;
+import org.springframework.web.bind.annotation.*;
+import points.transforming.app.server.models.geodeticobject.api.GeodeticObjectResponse;
+import points.transforming.app.server.services.geodeticobject.GeodeticObjectResponseProvider;
 import points.transforming.app.server.services.measurement.GeodeticObjectService;
 
 @RestController
@@ -19,7 +17,14 @@ public class GeodeticObjectController {
     private final GeodeticObjectService geodeticObjectService;
 
     @GetMapping(value = "/{measurementInternalId}")
-    public ResponseEntity<List<GeodeticObject>> getMeasurement(@PathVariable final String measurementInternalId) {
-        return ResponseEntity.ok().body(geodeticObjectService.getGeodeticObjects(measurementInternalId));
+    public ResponseEntity<List<GeodeticObjectResponse>> getGeodeticObjects(@PathVariable final String measurementInternalId) {
+        return new GeodeticObjectResponseProvider().doResponse(geodeticObjectService.getGeodeticObjects(measurementInternalId));
+    }
+
+    @DeleteMapping(value = "/{geodeticObjectId}")
+    public ResponseEntity<String> deleteGeodeticObjects(@PathVariable final Integer geodeticObjectId) {
+        geodeticObjectService.deleteGeodeticObject(geodeticObjectId);
+
+        return ResponseEntity.ok("Removed");
     }
 }

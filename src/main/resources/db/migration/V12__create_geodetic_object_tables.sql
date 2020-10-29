@@ -1,7 +1,9 @@
 CREATE TABLE geodetic_object (
  id int primary key auto_increment,
+ name VARCHAR(255) NOT NULL,
+ description VARCHAR(255),
  symbol VARCHAR(255) NOT NULL,
- color VARCHAR(255),
+ color VARCHAR(255) NOT NULL,
  measurement_internal_id VARCHAR(255) NOT NULL
 );
 

@@ -65,11 +65,11 @@ public class MeasurementService {
 
         picketService.setPicketInternalIds(measurement.getPickets());
         picketService.calculateCoordinatesToWgs84(measurement);
-        // geodeticObjectService.createGeodeticObjects(measurementRequest.getGeodeticObjectRequests(), measurement.getMeasurementInternalId());
 
         return this.measurementRepository.save(measurement);
     }
 
+    @Transactional
     public Measurement updateMeasurement(final String internalMeasurementId, final MeasurementRequest measurementRequest) {
         // TODO it will be fixed after authentication will be added
         final Optional<User> user = userRepository.findById(1);
@@ -84,7 +84,7 @@ public class MeasurementService {
 
         picketService.setInternalIdsForNewPickets(measurement.getPickets());
         picketService.calculateCoordinatesToWgs84(measurement);
-        // geodeticObjectService.createGeodeticObjects(measurementRequest.getGeodeticObjectRequests(), measurement.getMeasurementInternalId());
+        geodeticObjectService.createGeodeticObjects(measurementRequest.getGeodeticObjects(), measurement.getMeasurementInternalId());
 
         final Measurement newMeasurementCreated = this.measurementRepository.save(measurement);
         oldMeasurement.setEndDate(newMeasurementCreated.getCreationDate());

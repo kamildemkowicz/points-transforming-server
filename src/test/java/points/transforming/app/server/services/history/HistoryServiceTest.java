@@ -37,8 +37,7 @@ public class HistoryServiceTest {
 
         // when then
         assertThatThrownBy(() -> historyService.getHistoryChanges("notExist"))
-            .isInstanceOf(MeasurementNotFoundException.class)
-            .hasFieldOrPropertyWithValue("measurementId", "notExist");
+            .isInstanceOf(MeasurementNotFoundException.class);
     }
 
     @Test
@@ -107,7 +106,7 @@ public class HistoryServiceTest {
         // then
         assertThat(result.getChanges().size()).isEqualTo(1);
         assertThat(result.getChanges().get(0).getMeasurementChanges().size()).isEqualTo(2);
-        assertThat(result.getChanges().get(0).getMeasurementChanges().get(0).getLabel()).isEqualTo("name");
+        assertThat(result.getChanges().get(0).getMeasurementChanges().get(0).getLabel()).isEqualTo("Name");
         assertThat(result.getChanges().get(0).getMeasurementChanges().get(0).getOldValue()).isEqualTo("Measurement1");
         assertThat(result.getChanges().get(0).getMeasurementChanges().get(0).getNewValue()).isEqualTo("Measurement2");
         assertThat(result.getChanges().get(0).getMeasurementChanges().get(0).getType()).isEqualTo(HistoryChangeType.CUSTOM);
@@ -152,7 +151,7 @@ public class HistoryServiceTest {
         assertThat(result.getChanges().size()).isEqualTo(2);
 
         assertThat(result.getChanges().get(0).getMeasurementChanges().size()).isEqualTo(3);
-        assertThat(result.getChanges().get(0).getMeasurementChanges().get(0).getLabel()).isEqualTo("name");
+        assertThat(result.getChanges().get(0).getMeasurementChanges().get(0).getLabel()).isEqualTo("Name");
         assertThat(result.getChanges().get(0).getMeasurementChanges().get(0).getOldValue()).isEqualTo("Measurement2");
         assertThat(result.getChanges().get(0).getMeasurementChanges().get(0).getNewValue()).isEqualTo("Measurement1");
         assertThat(result.getChanges().get(0).getMeasurementChanges().get(0).getType()).isEqualTo(HistoryChangeType.CUSTOM);
@@ -160,7 +159,7 @@ public class HistoryServiceTest {
         assertThat(result.getChanges().get(0).getDateTime()).isEqualTo(now2);
 
         assertThat(result.getChanges().get(1).getMeasurementChanges().size()).isEqualTo(3);
-        assertThat(result.getChanges().get(1).getMeasurementChanges().get(0).getLabel()).isEqualTo("name");
+        assertThat(result.getChanges().get(1).getMeasurementChanges().get(0).getLabel()).isEqualTo("Name");
         assertThat(result.getChanges().get(1).getMeasurementChanges().get(0).getOldValue()).isEqualTo("Measurement1");
         assertThat(result.getChanges().get(1).getMeasurementChanges().get(0).getNewValue()).isEqualTo("Measurement2");
         assertThat(result.getChanges().get(1).getMeasurementChanges().get(0).getType()).isEqualTo(HistoryChangeType.CUSTOM);
@@ -211,15 +210,23 @@ public class HistoryServiceTest {
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(1).getOldValue()).isNull();
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(1).getNewValue()).isEqualTo("picket1");
-        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(1).getLabel()).isEqualTo("name");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(1).getLabel()).isEqualTo("Name");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(2).getOldValue()).isNull();
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(2).getNewValue()).isNotNull();
-        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(2).getLabel()).isEqualTo("coordinate X");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(2).getLabel()).isEqualTo("Longitude");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(3).getOldValue()).isNull();
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(3).getNewValue()).isNotNull();
-        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(3).getLabel()).isEqualTo("coordinate Y");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(3).getLabel()).isEqualTo("Latitude");
+
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(4).getOldValue()).isNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(4).getNewValue()).isNotNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(4).getLabel()).isEqualTo("Coordinate X 2000");
+
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(5).getOldValue()).isNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(5).getNewValue()).isNotNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(5).getLabel()).isEqualTo("Coordinate Y 2000");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(0).getOldValue()).isNull();
         assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(0).getNewValue()).isEqualTo("PIC-2");
@@ -227,15 +234,23 @@ public class HistoryServiceTest {
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(1).getOldValue()).isNull();
         assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(1).getNewValue()).isEqualTo("picket2");
-        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(1).getLabel()).isEqualTo("name");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(1).getLabel()).isEqualTo("Name");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(2).getOldValue()).isNull();
         assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(2).getNewValue()).isNotNull();
-        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(2).getLabel()).isEqualTo("coordinate X");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(2).getLabel()).isEqualTo("Longitude");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(3).getOldValue()).isNull();
         assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(3).getNewValue()).isNotNull();
-        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(3).getLabel()).isEqualTo("coordinate Y");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(3).getLabel()).isEqualTo("Latitude");
+
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(4).getOldValue()).isNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(4).getNewValue()).isNotNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(4).getLabel()).isEqualTo("Coordinate X 2000");
+
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(5).getOldValue()).isNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(5).getNewValue()).isNotNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(5).getLabel()).isEqualTo("Coordinate Y 2000");
     }
 
     @Test
@@ -286,15 +301,23 @@ public class HistoryServiceTest {
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(1).getOldValue()).isEqualTo("picket2");
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(1).getNewValue()).isNull();
-        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(1).getLabel()).isEqualTo("name");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(1).getLabel()).isEqualTo("Name");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(2).getOldValue()).isNotNull();
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(2).getNewValue()).isNull();
-        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(2).getLabel()).isEqualTo("coordinate X");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(2).getLabel()).isEqualTo("Longitude");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(3).getOldValue()).isNotNull();
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(3).getNewValue()).isNull();
-        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(3).getLabel()).isEqualTo("coordinate Y");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(3).getLabel()).isEqualTo("Latitude");
+
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(4).getOldValue()).isNotNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(4).getNewValue()).isNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(4).getLabel()).isEqualTo("Coordinate X 2000");
+
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(5).getOldValue()).isNotNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(5).getNewValue()).isNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(5).getLabel()).isEqualTo("Coordinate Y 2000");
     }
 
     @Test
@@ -304,6 +327,7 @@ public class HistoryServiceTest {
 
         final var mes = new Measurement();
         final var picket1Old = testHistoryServiceFactory.createValidPicket(1, mes);
+        picket1Old.setCoordinateX2000(null);
         mes.setName("Measurement1");
         mes.setPlace("Gdansk");
         mes.setOwner("Owner1");
@@ -318,6 +342,7 @@ public class HistoryServiceTest {
         final var mes2 = new Measurement();
         final var picket1New = testHistoryServiceFactory.createValidPicket(1, mes);
         picket1New.setName("NewName");
+        picket1New.setCoordinateY2000(null);
         mes2.setName("Measurement1");
         mes2.setPlace("Gdansk");
         mes2.setOwner("Owner1");
@@ -349,15 +374,23 @@ public class HistoryServiceTest {
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(1).getOldValue()).isNull();
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(1).getNewValue()).isEqualTo("picket3");
-        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(1).getLabel()).isEqualTo("name");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(1).getLabel()).isEqualTo("Name");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(2).getOldValue()).isNull();
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(2).getNewValue()).isNotNull();
-        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(2).getLabel()).isEqualTo("coordinate X");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(2).getLabel()).isEqualTo("Longitude");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(3).getOldValue()).isNull();
         assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(3).getNewValue()).isNotNull();
-        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(3).getLabel()).isEqualTo("coordinate Y");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(3).getLabel()).isEqualTo("Latitude");
+
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(4).getOldValue()).isNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(4).getNewValue()).isNotNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(4).getLabel()).isEqualTo("Coordinate X 2000");
+
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(5).getOldValue()).isNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(5).getNewValue()).isNotNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(0).getPicketSimpleChanges().get(5).getLabel()).isEqualTo("Coordinate Y 2000");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(1).getType()).isEqualTo(HistoryChangeType.REMOVE);
 
@@ -367,30 +400,48 @@ public class HistoryServiceTest {
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(1).getOldValue()).isEqualTo("picket2");
         assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(1).getNewValue()).isNull();
-        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(1).getLabel()).isEqualTo("name");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(1).getLabel()).isEqualTo("Name");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(2).getOldValue()).isNotNull();
         assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(2).getNewValue()).isNull();
-        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(2).getLabel()).isEqualTo("coordinate X");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(2).getLabel()).isEqualTo("Longitude");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(3).getOldValue()).isNotNull();
         assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(3).getNewValue()).isNull();
-        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(3).getLabel()).isEqualTo("coordinate Y");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(3).getLabel()).isEqualTo("Latitude");
+
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(4).getOldValue()).isNotNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(4).getNewValue()).isNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(4).getLabel()).isEqualTo("Coordinate X 2000");
+
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(5).getOldValue()).isNotNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(5).getNewValue()).isNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(1).getPicketSimpleChanges().get(5).getLabel()).isEqualTo("Coordinate Y 2000");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(0).getOldValue()).isNotNull();
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(0).getNewValue()).isEqualTo("NewName");
-        assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(0).getLabel()).isEqualTo("name");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(0).getLabel()).isEqualTo("Name");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(1).getOldValue())
             .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1Old.getLongitude()).setScale(2, RoundingMode.CEILING)));
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(1).getNewValue())
             .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1New.getLongitude()).setScale(2, RoundingMode.CEILING)));
-        assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(1).getLabel()).isEqualTo("longitude");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(1).getLabel()).isEqualTo("Longitude");
 
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(2).getOldValue())
             .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1Old.getLatitude()).setScale(2, RoundingMode.CEILING)));
         assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(2).getNewValue())
             .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1New.getLatitude()).setScale(2, RoundingMode.CEILING)));
-        assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(2).getLabel()).isEqualTo("latitude");
+        assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(2).getLabel()).isEqualTo("Latitude");
+
+        assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(3).getOldValue()).isNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(3).getNewValue())
+            .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1New.getCoordinateX2000()).setScale(2, RoundingMode.CEILING)));
+        assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(3).getLabel()).isEqualTo("Coordinate X 2000");
+
+        assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(4).getOldValue())
+            .isEqualTo(String.valueOf(BigDecimal.valueOf(picket1Old.getCoordinateY2000()).setScale(2, RoundingMode.CEILING)));
+        assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(4).getNewValue()).isNull();
+        assertThat(result.getChanges().get(0).getPicketChanges().get(2).getPicketSimpleChanges().get(4).getLabel()).isEqualTo("Coordinate Y 2000");
     }
 }

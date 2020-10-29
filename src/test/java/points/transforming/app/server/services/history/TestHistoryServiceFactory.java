@@ -18,6 +18,8 @@ public class TestHistoryServiceFactory {
         picket.setName("picket" + picketNumber);
         picket.setLongitude(100 * random.nextDouble());
         picket.setLatitude(100 * random.nextDouble());
+        picket.setCoordinateX2000(100 * random.nextDouble());
+        picket.setCoordinateY2000(100 * random.nextDouble());
         picket.setPicketInternalId("PIC-" + picketNumber);
         picket.setMeasurement(measurement);
 

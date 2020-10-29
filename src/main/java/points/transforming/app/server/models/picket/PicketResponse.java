@@ -9,10 +9,10 @@ public class PicketResponse {
     private final int id;
     private final String picketInternalId;
     private final String name;
-    private final double longitude;
-    private final double latitude;
-    private final double coordinateX2000;
-    private final double coordinateY2000;
+    private final Double longitude;
+    private final Double latitude;
+    private final Double coordinateX2000;
+    private final Double coordinateY2000;
 
     public static PicketResponse of(final Picket picket) {
         return PicketResponse.builder()

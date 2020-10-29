@@ -68,11 +68,11 @@ public class HistoryService {
     private List<HistorySimpleChange> compareMeasurementVersions(final Measurement oldMeasurement, final Measurement newMeasurement) {
         final var historyChanges = new ArrayList<HistorySimpleChange>();
         if(!(oldMeasurement.getName().equals(newMeasurement.getName())))
-            historyChanges.add(this.createHistoryChange("name", oldMeasurement.getName(), newMeasurement.getName(), HistoryChangeType.CUSTOM));
+            historyChanges.add(this.createHistoryChange("Name", oldMeasurement.getName(), newMeasurement.getName(), HistoryChangeType.CUSTOM));
         if(!oldMeasurement.getOwner().equals(newMeasurement.getOwner()))
-            historyChanges.add(this.createHistoryChange("owner", oldMeasurement.getOwner(), newMeasurement.getOwner(), HistoryChangeType.CUSTOM));
+            historyChanges.add(this.createHistoryChange("Owner", oldMeasurement.getOwner(), newMeasurement.getOwner(), HistoryChangeType.CUSTOM));
         if(!oldMeasurement.getPlace().equals(newMeasurement.getPlace()))
-            historyChanges.add(this.createHistoryChange("place", oldMeasurement.getPlace(), newMeasurement.getPlace(), HistoryChangeType.CUSTOM));
+            historyChanges.add(this.createHistoryChange("Place", oldMeasurement.getPlace(), newMeasurement.getPlace(), HistoryChangeType.CUSTOM));
 
         return historyChanges;
     }
@@ -91,55 +91,81 @@ public class HistoryService {
     private List<HistoryPicketChange> comparePickets(final List<Picket> oldMeasurementPickets, final List<Picket> newMeasurementPickets) {
         final var picketsChanges = new ArrayList<HistoryPicketChange>();
 
-        extractDifferentPickets(oldMeasurementPickets, newMeasurementPickets).forEach(addedPicket ->
-            picketsChanges.add(
-                HistoryPicketChange.builder()
-                    .picket(PicketResponse.of(addedPicket))
-                    .picketSimpleChanges(List.of(
-                        createHistoryChange("Internal ID", null, addedPicket.getPicketInternalId(), HistoryChangeType.ADD),
-                        createHistoryChange("name", null, addedPicket.getName(), HistoryChangeType.ADD),
-                        createHistoryChange("longitude", null, String.valueOf(
-                            BigDecimal.valueOf(addedPicket.getLongitude()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD),
-                        createHistoryChange("latitude", null, String.valueOf(
-                            BigDecimal.valueOf(addedPicket.getLatitude()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD),
-                        createHistoryChange("coordinate X 2000", null, String.valueOf(
-                            BigDecimal.valueOf(addedPicket.getCoordinateX2000()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD),
-                        createHistoryChange("coordinate Y 2000", null, String.valueOf(
-                            BigDecimal.valueOf(addedPicket.getCoordinateY2000()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD)
-                    ))
-                    .type(HistoryChangeType.ADD)
-                    .build()
-            )
-        );
+        extractDifferentPickets(oldMeasurementPickets, newMeasurementPickets).forEach(addedPicket -> {
+            final var picketSimpleChanges = new ArrayList<>(List.of(
+                createHistoryChange("Internal ID", null, addedPicket.getPicketInternalId(), HistoryChangeType.ADD),
+                createHistoryChange("Name", null, addedPicket.getName(), HistoryChangeType.ADD))
+            );
 
-        extractDifferentPickets(newMeasurementPickets, oldMeasurementPickets).forEach(removedPicket ->
-            picketsChanges.add(
-                HistoryPicketChange.builder()
-                    .picket(PicketResponse.of(removedPicket))
-                    .picketSimpleChanges(List.of(
-                        createHistoryChange("Internal ID", removedPicket.getPicketInternalId(), null, HistoryChangeType.REMOVE),
-                        createHistoryChange("name", removedPicket.getName(), null, HistoryChangeType.REMOVE),
-                        createHistoryChange("longitude", String.valueOf(
-                            BigDecimal.valueOf(removedPicket.getLongitude()).setScale(2, RoundingMode.CEILING)),
-                            null,
-                            HistoryChangeType.REMOVE),
-                        createHistoryChange("latitude", String.valueOf(
-                            BigDecimal.valueOf(removedPicket.getLatitude()).setScale(2, RoundingMode.CEILING)),
-                            null,
-                            HistoryChangeType.REMOVE),
-                        createHistoryChange("coordinate X 2000", String.valueOf(
-                            BigDecimal.valueOf(removedPicket.getCoordinateX2000()).setScale(2, RoundingMode.CEILING)),
-                            null,
-                            HistoryChangeType.REMOVE),
-                        createHistoryChange("coordinate Y 2000", String.valueOf(
-                            BigDecimal.valueOf(removedPicket.getCoordinateY2000()).setScale(2, RoundingMode.CEILING)),
-                            null,
-                            HistoryChangeType.REMOVE)
-                    ))
-                    .type(HistoryChangeType.REMOVE)
-                    .build()
-            )
-        );
+            if (Objects.nonNull(addedPicket.getLongitude())) {
+                picketSimpleChanges.add(createHistoryChange("Longitude", null,
+                    String.valueOf(BigDecimal.valueOf(addedPicket.getLongitude()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD));
+            }
+
+            if (Objects.nonNull(addedPicket.getLatitude())) {
+                picketSimpleChanges.add(createHistoryChange("Latitude", null, String.valueOf(
+                    BigDecimal.valueOf(addedPicket.getLatitude()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD));
+            }
+
+            if (Objects.nonNull(addedPicket.getCoordinateX2000())) {
+                picketSimpleChanges.add(createHistoryChange("Coordinate X 2000", null, String.valueOf(
+                    BigDecimal.valueOf(addedPicket.getCoordinateX2000()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD));
+            }
+
+            if (Objects.nonNull(addedPicket.getCoordinateY2000())) {
+                picketSimpleChanges.add(createHistoryChange("Coordinate Y 2000", null, String.valueOf(
+                    BigDecimal.valueOf(addedPicket.getCoordinateY2000()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD));
+            }
+
+            final var historyPicketChange = HistoryPicketChange.builder()
+                .picket(PicketResponse.of(addedPicket))
+                .picketSimpleChanges(picketSimpleChanges)
+                .type(HistoryChangeType.ADD)
+                .build();
+            picketsChanges.add(historyPicketChange);
+        });
+
+        extractDifferentPickets(newMeasurementPickets, oldMeasurementPickets).forEach(removedPicket -> {
+            final var picketSimpleChanges = new ArrayList<>(List.of(
+                createHistoryChange("Internal ID", removedPicket.getPicketInternalId(), null, HistoryChangeType.REMOVE),
+                createHistoryChange("Name", removedPicket.getName(), null, HistoryChangeType.REMOVE))
+            );
+
+            if (Objects.nonNull(removedPicket.getLongitude())) {
+                picketSimpleChanges.add(createHistoryChange("Longitude", String.valueOf(
+                    BigDecimal.valueOf(removedPicket.getLongitude()).setScale(2, RoundingMode.CEILING)),
+                    null,
+                    HistoryChangeType.REMOVE));
+            }
+
+            if (Objects.nonNull(removedPicket.getLatitude())) {
+                picketSimpleChanges.add(createHistoryChange("Latitude", String.valueOf(
+                    BigDecimal.valueOf(removedPicket.getLatitude()).setScale(2, RoundingMode.CEILING)),
+                    null,
+                    HistoryChangeType.REMOVE));
+            }
+
+            if (Objects.nonNull(removedPicket.getCoordinateX2000())) {
+                picketSimpleChanges.add(createHistoryChange("Coordinate X 2000", String.valueOf(
+                    BigDecimal.valueOf(removedPicket.getCoordinateX2000()).setScale(2, RoundingMode.CEILING)),
+                    null,
+                    HistoryChangeType.REMOVE));
+            }
+
+            if (Objects.nonNull(removedPicket.getCoordinateY2000())) {
+                picketSimpleChanges.add(createHistoryChange("Coordinate Y 2000", String.valueOf(
+                    BigDecimal.valueOf(removedPicket.getCoordinateY2000()).setScale(2, RoundingMode.CEILING)),
+                    null,
+                    HistoryChangeType.REMOVE));
+            }
+
+            final var historyPicketChange = HistoryPicketChange.builder()
+                .picket(PicketResponse.of(removedPicket))
+                .picketSimpleChanges(picketSimpleChanges)
+                .type(HistoryChangeType.REMOVE)
+                .build();
+            picketsChanges.add(historyPicketChange);
+        });
 
         findSamePickets(oldMeasurementPickets, newMeasurementPickets).forEach(changedPicketPair -> {
             final var oldPicket = changedPicketPair.getFirst();
@@ -186,35 +212,12 @@ public class HistoryService {
     private Optional<HistoryPicketChange> createPicketHistoryChange(final Picket oldPicket, final Picket newPicket) {
         final var singlePicketHistoryChanges = new ArrayList<HistorySimpleChange>();
         if (!(oldPicket.getName().equals(newPicket.getName())))
-            singlePicketHistoryChanges.add(createHistoryChange("name", oldPicket.getName(), newPicket.getName(), HistoryChangeType.CHANGED_VALUE));
+            singlePicketHistoryChanges.add(createHistoryChange("Name", oldPicket.getName(), newPicket.getName(), HistoryChangeType.CHANGED_VALUE));
 
-        if (oldPicket.getLongitude() != newPicket.getLongitude()) {
-            singlePicketHistoryChanges.add(createHistoryChange("longitude",
-                String.valueOf(BigDecimal.valueOf(oldPicket.getLongitude()).setScale(2, RoundingMode.CEILING)),
-                String.valueOf(BigDecimal.valueOf(newPicket.getLongitude()).setScale(2, RoundingMode.CEILING)),
-                HistoryChangeType.CHANGED_VALUE));
-        }
-
-        if (oldPicket.getLatitude() != newPicket.getLatitude()) {
-            singlePicketHistoryChanges.add(createHistoryChange("latitude",
-                String.valueOf(BigDecimal.valueOf(oldPicket.getLatitude()).setScale(2, RoundingMode.CEILING)),
-                String.valueOf(BigDecimal.valueOf(newPicket.getLatitude()).setScale(2, RoundingMode.CEILING)),
-                HistoryChangeType.CHANGED_VALUE));
-        }
-
-        if (oldPicket.getCoordinateX2000() != newPicket.getCoordinateX2000()) {
-            singlePicketHistoryChanges.add(createHistoryChange("coordinate X 2000",
-                String.valueOf(BigDecimal.valueOf(oldPicket.getCoordinateX2000()).setScale(2, RoundingMode.CEILING)),
-                String.valueOf(BigDecimal.valueOf(newPicket.getCoordinateX2000()).setScale(2, RoundingMode.CEILING)),
-                HistoryChangeType.CHANGED_VALUE));
-        }
-
-        if (oldPicket.getCoordinateY2000() != newPicket.getCoordinateY2000()) {
-            singlePicketHistoryChanges.add(createHistoryChange("coordinate Y 2000",
-                String.valueOf(BigDecimal.valueOf(oldPicket.getCoordinateY2000()).setScale(2, RoundingMode.CEILING)),
-                String.valueOf(BigDecimal.valueOf(newPicket.getCoordinateY2000()).setScale(2, RoundingMode.CEILING)),
-                HistoryChangeType.CHANGED_VALUE));
-        }
+        createHistorySimpleChange("Longitude", oldPicket.getLongitude(), newPicket.getLongitude()).ifPresent(singlePicketHistoryChanges::add);
+        createHistorySimpleChange("Latitude", oldPicket.getLatitude(), newPicket.getLatitude()).ifPresent(singlePicketHistoryChanges::add);
+        createHistorySimpleChange("Coordinate X 2000", oldPicket.getCoordinateX2000(), newPicket.getCoordinateX2000()).ifPresent(singlePicketHistoryChanges::add);
+        createHistorySimpleChange("Coordinate Y 2000", oldPicket.getCoordinateY2000(), newPicket.getCoordinateY2000()).ifPresent(singlePicketHistoryChanges::add);
 
         if (singlePicketHistoryChanges.isEmpty())
             return Optional.empty();
@@ -224,6 +227,34 @@ public class HistoryService {
             .picketSimpleChanges(singlePicketHistoryChanges)
             .type(HistoryChangeType.CHANGED_VALUE)
             .build());
+    }
+
+    private Optional<HistorySimpleChange> createHistorySimpleChange(final String label, final Double oldPicketValue, final Double newPicketValue) {
+        if (Objects.nonNull(oldPicketValue) && Objects.nonNull(newPicketValue) && !oldPicketValue.equals(newPicketValue)) {
+            return Optional.of(createHistoryChange(label,
+                String.valueOf(BigDecimal.valueOf(oldPicketValue).setScale(2, RoundingMode.CEILING)),
+                String.valueOf(BigDecimal.valueOf(newPicketValue).setScale(2, RoundingMode.CEILING)),
+                HistoryChangeType.CHANGED_VALUE)
+            );
+        }
+
+        if (Objects.isNull(oldPicketValue) && Objects.nonNull(newPicketValue)) {
+            return Optional.of(createHistoryChange(label,
+                null,
+                String.valueOf(BigDecimal.valueOf(newPicketValue).setScale(2, RoundingMode.CEILING)),
+                HistoryChangeType.CHANGED_VALUE)
+            );
+        }
+
+        if (Objects.nonNull(oldPicketValue) && Objects.isNull(newPicketValue)) {
+            return Optional.of(createHistoryChange(label,
+                String.valueOf(BigDecimal.valueOf(oldPicketValue).setScale(2, RoundingMode.CEILING)),
+                null,
+                HistoryChangeType.CHANGED_VALUE)
+            );
+        }
+
+        return Optional.empty();
     }
 
     enum Error {

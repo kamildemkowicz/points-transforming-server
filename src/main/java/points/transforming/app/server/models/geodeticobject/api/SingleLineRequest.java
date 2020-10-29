@@ -9,6 +9,8 @@ import lombok.Getter;
 @Builder
 public class SingleLineRequest {
 
+    private final Integer id;
+
     @NotBlank
     private final String startPicketInternalId;
 
