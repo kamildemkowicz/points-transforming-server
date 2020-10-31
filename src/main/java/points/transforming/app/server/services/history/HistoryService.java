@@ -99,12 +99,12 @@ public class HistoryService {
 
             if (Objects.nonNull(addedPicket.getLongitude())) {
                 picketSimpleChanges.add(createHistoryChange("Longitude", null,
-                    String.valueOf(BigDecimal.valueOf(addedPicket.getLongitude()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD));
+                    String.valueOf(BigDecimal.valueOf(addedPicket.getLongitude()).setScale(14, RoundingMode.CEILING)), HistoryChangeType.ADD));
             }
 
             if (Objects.nonNull(addedPicket.getLatitude())) {
                 picketSimpleChanges.add(createHistoryChange("Latitude", null, String.valueOf(
-                    BigDecimal.valueOf(addedPicket.getLatitude()).setScale(2, RoundingMode.CEILING)), HistoryChangeType.ADD));
+                    BigDecimal.valueOf(addedPicket.getLatitude()).setScale(14, RoundingMode.CEILING)), HistoryChangeType.ADD));
             }
 
             if (Objects.nonNull(addedPicket.getCoordinateX2000())) {
@@ -133,14 +133,14 @@ public class HistoryService {
 
             if (Objects.nonNull(removedPicket.getLongitude())) {
                 picketSimpleChanges.add(createHistoryChange("Longitude", String.valueOf(
-                    BigDecimal.valueOf(removedPicket.getLongitude()).setScale(2, RoundingMode.CEILING)),
+                    BigDecimal.valueOf(removedPicket.getLongitude()).setScale(14, RoundingMode.CEILING)),
                     null,
                     HistoryChangeType.REMOVE));
             }
 
             if (Objects.nonNull(removedPicket.getLatitude())) {
                 picketSimpleChanges.add(createHistoryChange("Latitude", String.valueOf(
-                    BigDecimal.valueOf(removedPicket.getLatitude()).setScale(2, RoundingMode.CEILING)),
+                    BigDecimal.valueOf(removedPicket.getLatitude()).setScale(14, RoundingMode.CEILING)),
                     null,
                     HistoryChangeType.REMOVE));
             }
@@ -214,10 +214,10 @@ public class HistoryService {
         if (!(oldPicket.getName().equals(newPicket.getName())))
             singlePicketHistoryChanges.add(createHistoryChange("Name", oldPicket.getName(), newPicket.getName(), HistoryChangeType.CHANGED_VALUE));
 
-        createHistorySimpleChange("Longitude", oldPicket.getLongitude(), newPicket.getLongitude()).ifPresent(singlePicketHistoryChanges::add);
-        createHistorySimpleChange("Latitude", oldPicket.getLatitude(), newPicket.getLatitude()).ifPresent(singlePicketHistoryChanges::add);
-        createHistorySimpleChange("Coordinate X 2000", oldPicket.getCoordinateX2000(), newPicket.getCoordinateX2000()).ifPresent(singlePicketHistoryChanges::add);
-        createHistorySimpleChange("Coordinate Y 2000", oldPicket.getCoordinateY2000(), newPicket.getCoordinateY2000()).ifPresent(singlePicketHistoryChanges::add);
+        createHistorySimpleChange("Longitude", oldPicket.getLongitude(), newPicket.getLongitude(), 14).ifPresent(singlePicketHistoryChanges::add);
+        createHistorySimpleChange("Latitude", oldPicket.getLatitude(), newPicket.getLatitude(), 14).ifPresent(singlePicketHistoryChanges::add);
+        createHistorySimpleChange("Coordinate X 2000", oldPicket.getCoordinateX2000(), newPicket.getCoordinateX2000(), 2).ifPresent(singlePicketHistoryChanges::add);
+        createHistorySimpleChange("Coordinate Y 2000", oldPicket.getCoordinateY2000(), newPicket.getCoordinateY2000(), 2).ifPresent(singlePicketHistoryChanges::add);
 
         if (singlePicketHistoryChanges.isEmpty())
             return Optional.empty();
@@ -229,11 +229,12 @@ public class HistoryService {
             .build());
     }
 
-    private Optional<HistorySimpleChange> createHistorySimpleChange(final String label, final Double oldPicketValue, final Double newPicketValue) {
+    private Optional<HistorySimpleChange> createHistorySimpleChange(final String label, final Double oldPicketValue, final Double newPicketValue,
+                                                                    final Integer scale) {
         if (Objects.nonNull(oldPicketValue) && Objects.nonNull(newPicketValue) && !oldPicketValue.equals(newPicketValue)) {
             return Optional.of(createHistoryChange(label,
-                String.valueOf(BigDecimal.valueOf(oldPicketValue).setScale(2, RoundingMode.CEILING)),
-                String.valueOf(BigDecimal.valueOf(newPicketValue).setScale(2, RoundingMode.CEILING)),
+                String.valueOf(BigDecimal.valueOf(oldPicketValue).setScale(scale, RoundingMode.CEILING)),
+                String.valueOf(BigDecimal.valueOf(newPicketValue).setScale(scale, RoundingMode.CEILING)),
                 HistoryChangeType.CHANGED_VALUE)
             );
         }
@@ -241,14 +242,14 @@ public class HistoryService {
         if (Objects.isNull(oldPicketValue) && Objects.nonNull(newPicketValue)) {
             return Optional.of(createHistoryChange(label,
                 null,
-                String.valueOf(BigDecimal.valueOf(newPicketValue).setScale(2, RoundingMode.CEILING)),
+                String.valueOf(BigDecimal.valueOf(newPicketValue).setScale(scale, RoundingMode.CEILING)),
                 HistoryChangeType.CHANGED_VALUE)
             );
         }
 
         if (Objects.nonNull(oldPicketValue) && Objects.isNull(newPicketValue)) {
             return Optional.of(createHistoryChange(label,
-                String.valueOf(BigDecimal.valueOf(oldPicketValue).setScale(2, RoundingMode.CEILING)),
+                String.valueOf(BigDecimal.valueOf(oldPicketValue).setScale(scale, RoundingMode.CEILING)),
                 null,
                 HistoryChangeType.CHANGED_VALUE)
             );

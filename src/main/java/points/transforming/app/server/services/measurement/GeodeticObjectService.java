@@ -6,10 +6,8 @@ import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import points.transforming.app.server.models.geodeticobject.api.GeodeticObjectMappers;
-import points.transforming.app.server.models.geodeticobject.api.GeodeticObjectRequest;
-import points.transforming.app.server.models.geodeticobject.api.GeodeticObjectResponse;
-import points.transforming.app.server.models.geodeticobject.api.SingleLineResponse;
+import points.transforming.app.server.exceptions.GeodeticObjectNotFoundException;
+import points.transforming.app.server.models.geodeticobject.api.*;
 import points.transforming.app.server.models.picket.PicketResponse;
 import points.transforming.app.server.repositories.GeodeticObjectRepository;
 import points.transforming.app.server.services.picket.PicketService;
@@ -45,17 +43,62 @@ public class GeodeticObjectService {
         return result;
     }
 
-    public void createGeodeticObjects(final List<GeodeticObjectRequest> geodeticObjectRequest, final String measurementInternalId) {
-        geodeticObjectRequest.forEach(geodeticObject -> singleLineValidator.validate(geodeticObject.getSingleLines()));
+    public GeodeticObjectResponse createGeodeticObject(final GeodeticObjectRequest geodeticObjectRequest) {
+        singleLineValidator.validateCreationRequest(geodeticObjectRequest.getSingleLines());
 
-        final var geodeticObjects = geodeticObjectRequest.stream()
-            .map(geodeticObject -> GeodeticObjectMappers.toGeodeticObject(geodeticObject, measurementInternalId))
-            .collect(Collectors.toUnmodifiableList());
+        final var geodeticObject = geodeticObjectRepository.save(GeodeticObjectMappers.toGeodeticObject(geodeticObjectRequest));
 
-        geodeticObjectRepository.saveAll(geodeticObjects);
+        return GeodeticObjectResponse.builder()
+            .symbol(geodeticObject.getSymbol())
+            .color(geodeticObject.getColor())
+            .description(geodeticObject.getDescription())
+            .name(geodeticObject.getName())
+            .id(geodeticObject.getId())
+            .singleLines(geodeticObject.getSingleLines().stream()
+                .map(singleLine -> SingleLineResponse.of(
+                    singleLine,
+                    PicketResponse.of(picketService.getPicket(singleLine.getStartPicketInternalId())),
+                    PicketResponse.of(picketService.getPicket(singleLine.getEndPicketInternalId())))
+                )
+                .collect(Collectors.toUnmodifiableList())
+            )
+            .build();
+    }
+
+    public GeodeticObjectResponse updateGeodeticObject(final GeodeticObjectUpdateRequest geodeticObjectRequest) {
+        singleLineValidator.validate(geodeticObjectRequest.getSingleLines());
+
+        final var geodeticObject = geodeticObjectRepository.findById(geodeticObjectRequest.getId())
+            .orElseThrow(() -> new GeodeticObjectNotFoundException(Error.GEODETIC_OBJECT_DOES_NOT_EXIST_PTS401));
+
+        final var geodeticObjectUpdated = geodeticObjectRepository.save(GeodeticObjectMappers.updateGeodeticObject(geodeticObject, geodeticObjectRequest));
+
+        return GeodeticObjectResponse.builder()
+            .symbol(geodeticObjectUpdated.getSymbol())
+            .color(geodeticObjectUpdated.getColor())
+            .description(geodeticObjectUpdated.getDescription())
+            .name(geodeticObjectUpdated.getName())
+            .id(geodeticObjectUpdated.getId())
+            .singleLines(geodeticObjectUpdated.getSingleLines().stream()
+                .map(singleLine -> SingleLineResponse.of(
+                    singleLine,
+                    PicketResponse.of(picketService.getPicket(singleLine.getStartPicketInternalId())),
+                    PicketResponse.of(picketService.getPicket(singleLine.getEndPicketInternalId())))
+                )
+                .collect(Collectors.toUnmodifiableList())
+            )
+            .build();
     }
 
     public void deleteGeodeticObject(final int geodeticObjectId) {
-        geodeticObjectRepository.deleteById(geodeticObjectId);
+        if (geodeticObjectRepository.existsById(geodeticObjectId)) {
+            geodeticObjectRepository.deleteById(geodeticObjectId);
+        } else {
+            throw new GeodeticObjectNotFoundException(Error.GEODETIC_OBJECT_DOES_NOT_EXIST_PTS401);
+        }
+    }
+
+    enum Error {
+        GEODETIC_OBJECT_DOES_NOT_EXIST_PTS401
     }
 }

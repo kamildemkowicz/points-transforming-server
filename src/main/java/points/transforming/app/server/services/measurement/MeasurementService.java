@@ -25,7 +25,6 @@ public class MeasurementService {
     private final UserRepository userRepository;
     private final PicketService picketService;
     private final DistrictService districtService;
-    private final GeodeticObjectService geodeticObjectService;
 
     public List<MeasurementResponse> getAllMeasurement() {
         return this.measurementRepository
@@ -84,7 +83,6 @@ public class MeasurementService {
 
         picketService.setInternalIdsForNewPickets(measurement.getPickets());
         picketService.calculateCoordinatesToWgs84(measurement);
-        geodeticObjectService.createGeodeticObjects(measurementRequest.getGeodeticObjects(), measurement.getMeasurementInternalId());
 
         final Measurement newMeasurementCreated = this.measurementRepository.save(measurement);
         oldMeasurement.setEndDate(newMeasurementCreated.getCreationDate());

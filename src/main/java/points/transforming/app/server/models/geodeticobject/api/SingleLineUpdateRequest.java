@@ -1,13 +1,17 @@
 package points.transforming.app.server.models.geodeticobject.api;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
-public class SingleLineRequest {
+public class SingleLineUpdateRequest {
+
+    @NotNull
+    private final Integer id;
 
     @NotBlank
     private final String startPicketInternalId;

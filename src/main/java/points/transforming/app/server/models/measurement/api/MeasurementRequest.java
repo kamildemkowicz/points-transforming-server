@@ -6,7 +6,6 @@ import javax.validation.constraints.Positive;
 
 import lombok.Builder;
 import lombok.Getter;
-import points.transforming.app.server.models.geodeticobject.api.GeodeticObjectRequest;
 import points.transforming.app.server.models.picket.PicketRequest;
 
 import java.util.ArrayList;
@@ -31,7 +30,4 @@ public class MeasurementRequest {
 
     @Builder.Default
     private final List<PicketRequest> pickets = new ArrayList<>();
-
-    @Builder.Default
-    private final List<GeodeticObjectRequest> geodeticObjects = new ArrayList<>();
 }
