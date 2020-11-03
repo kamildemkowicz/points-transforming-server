@@ -9,9 +9,6 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import points.transforming.app.server.models.measurement.District;
 import points.transforming.app.server.models.measurement.Measurement;
 import points.transforming.app.server.models.picket.Picket;
-import points.transforming.app.server.models.user.User;
-
-
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,7 +23,6 @@ import java.util.Random;
 public class V7__create_fixtures extends BaseJavaMigration {
     private final List<Measurement> measurements = new ArrayList<>();
     private final List<Picket> pickets = new ArrayList<>();
-    User user = new User();
     private final District district = new District();
 
     Random r = new Random();
@@ -42,30 +38,13 @@ public class V7__create_fixtures extends BaseJavaMigration {
 
     @Override
     public void migrate(Context context) {
-        this.createUser();
         this.createMeasurements();
         this.createPickets();
 
-        var insertUsers = "INSERT INTO users (user_name, password, email) VALUES (?, ?, ?)";
         var insertMeasurement = "INSERT INTO measurement (measurement_internal_id, name, creation_date, end_date, place, owner, version, user_id, district_id)" +
             " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         var insertPickets = "INSERT INTO picket (picket_internal_id, name, latitude, longitude, coordinate_x_2000, coordinate_y_2000, measurement_id)" +
             " VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-        new JdbcTemplate(new SingleConnectionDataSource(context.getConnection(), true))
-                .batchUpdate(insertUsers, new BatchPreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        ps.setString(1, user.getUserName());
-                        ps.setString(2, user.getPassword());
-                        ps.setString(3, user.getEmail());
-                    }
-
-                    @Override
-                    public int getBatchSize() {
-                        return 1;
-                    }
-                });
 
         new JdbcTemplate(new SingleConnectionDataSource(context.getConnection(), true))
                 .batchUpdate(insertMeasurement, new BatchPreparedStatementSetter() {
@@ -78,7 +57,7 @@ public class V7__create_fixtures extends BaseJavaMigration {
                         ps.setString(5, measurements.get(i).getPlace());
                         ps.setString(6, measurements.get(i).getOwner());
                         ps.setInt(7, measurements.get(i).getVersion());
-                        ps.setInt(8, measurements.get(i).getUser().getId());
+                        ps.setInt(8, 1);
                         ps.setInt(9, measurements.get(i).getDistrict().getId());
                     }
 
@@ -114,13 +93,6 @@ public class V7__create_fixtures extends BaseJavaMigration {
                         return pickets.size();
                     }
                 });
-    }
-
-    private void createUser() {
-        user.setId(1);
-        user.setUserName("test");
-        user.setPassword("test");
-        user.setEmail("test@gmail.com");
     }
 
     private void createMeasurements() {
@@ -178,7 +150,6 @@ public class V7__create_fixtures extends BaseJavaMigration {
         m.setPlace(place);
         m.setCreationDate(creationDate);
         m.setEndDate(endDate);
-        m.setUser(user);
         district.setId(RandomUtils.nextInt(350));
         m.setDistrict(district);
         this.measurements.add(m);

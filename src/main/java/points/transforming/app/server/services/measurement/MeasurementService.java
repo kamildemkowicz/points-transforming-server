@@ -51,7 +51,6 @@ public class MeasurementService {
 
     @Transactional
     public Measurement createMeasurement(final MeasurementRequest measurementRequest) {
-        // TODO it will be fixed after authentication will be added
         final Optional<User> user = userRepository.findById(1);
         final int highestMeasurementInternalId = this.measurementRepository.getHighestInternalId();
 
