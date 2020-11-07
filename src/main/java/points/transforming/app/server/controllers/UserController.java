@@ -45,7 +45,7 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody CreateUserRequest signUpRequest) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody final CreateUserRequest signUpRequest) {
         userService.createUser(signUpRequest);
 
         return new ResponseEntity<>(new ResponseMessage("User registered successfully!"), HttpStatus.OK);

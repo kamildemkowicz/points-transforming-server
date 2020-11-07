@@ -13,6 +13,7 @@ import points.transforming.app.server.repositories.MeasurementRepository;
 import points.transforming.app.server.repositories.UserRepository;
 import points.transforming.app.server.services.picket.PicketService;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,18 +27,12 @@ public class MeasurementService {
     private final PicketService picketService;
     private final DistrictService districtService;
 
-    public List<MeasurementResponse> getAllMeasurement() {
-        return this.measurementRepository
-                .findAll()
-                .stream()
-                .map(MeasurementResponse::of)
-                .collect(Collectors.toList());
-    }
+    public List<MeasurementResponse> getAllMeasurement(final String userName) {
+        final var user = userRepository.findByUsername(userName)
+            .orElseThrow(() -> new MeasurementNotFoundException(Error.USER_DOES_NOT_EXIST_PTS500));
 
-    public List<MeasurementResponse> getAllMeasurement(final Pageable page) {
         return this.measurementRepository
-                .findAll(page)
-                .getContent()
+                .findAll(user)
                 .stream()
                 .map(MeasurementResponse::of)
                 .collect(Collectors.toList());
@@ -50,13 +45,15 @@ public class MeasurementService {
     }
 
     @Transactional
-    public Measurement createMeasurement(final MeasurementRequest measurementRequest) {
-        final Optional<User> user = userRepository.findById(1);
+    public Measurement createMeasurement(final MeasurementRequest measurementRequest, final Principal principal) {
+        final var user = userRepository.findByUsername(principal.getName())
+            .orElseThrow(() -> new MeasurementNotFoundException(Error.USER_DOES_NOT_EXIST_PTS500));
+
         final int highestMeasurementInternalId = this.measurementRepository.getHighestInternalId();
 
         final Measurement measurement = MeasurementMapper.toMeasurementFrom(measurementRequest);
 
-        measurement.setUser(user.get());
+        measurement.setUser(user);
         measurement.setDistrict(districtService.getDistrictById(measurementRequest.getDistrictId()));
         measurement.setMeasurementInternalId("MES-" + (highestMeasurementInternalId + 1));
         measurement.setVersion(1);
@@ -68,14 +65,14 @@ public class MeasurementService {
     }
 
     @Transactional
-    public Measurement updateMeasurement(final String internalMeasurementId, final MeasurementRequest measurementRequest) {
-        // TODO it will be fixed after authentication will be added
-        final Optional<User> user = userRepository.findById(1);
+    public Measurement updateMeasurement(final String internalMeasurementId, final MeasurementRequest measurementRequest, final Principal principal) {
+        final var user = userRepository.findByUsername(principal.getName())
+            .orElseThrow(() -> new MeasurementNotFoundException(Error.USER_DOES_NOT_EXIST_PTS500));
 
         final Measurement oldMeasurement = getMeasurement(internalMeasurementId);
         final Measurement measurement = MeasurementMapper.toMeasurementFrom(measurementRequest);
 
-        measurement.setUser(user.get());
+        measurement.setUser(user);
         measurement.setDistrict(districtService.getDistrictById(measurementRequest.getDistrictId()));
         measurement.setVersion(oldMeasurement.getVersion() + 1);
         measurement.setMeasurementInternalId(oldMeasurement.getMeasurementInternalId());
@@ -92,6 +89,6 @@ public class MeasurementService {
     }
 
     enum Error {
-        MEASUREMENT_DOES_NOT_EXIST_PTS100
+        MEASUREMENT_DOES_NOT_EXIST_PTS100, USER_DOES_NOT_EXIST_PTS500
     }
 }

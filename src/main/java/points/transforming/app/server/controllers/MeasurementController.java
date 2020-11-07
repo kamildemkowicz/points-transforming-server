@@ -14,6 +14,7 @@ import points.transforming.app.server.services.measurement.MeasurementResponsePr
 import points.transforming.app.server.services.measurement.MeasurementService;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -25,15 +26,9 @@ public class MeasurementController {
     private static final Logger logger = LoggerFactory.getLogger(MeasurementController.class);
 
     @GetMapping(params = {"!sort", "!page", "!size"})
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<MeasurementResponse>> getAllMeasurements() {
-        return ResponseEntity.ok().body(this.measurementService.getAllMeasurement());
-    }
-
-    @GetMapping
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<MeasurementResponse>> getAllMeasurements(final Pageable page) {
-        return ResponseEntity.ok().body(this.measurementService.getAllMeasurement(page));
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<List<MeasurementResponse>> getAllMeasurements(final Principal principal) {
+        return ResponseEntity.ok().body(this.measurementService.getAllMeasurement(principal.getName()));
     }
 
     @GetMapping(value = "/{measurementInternalId}")
@@ -43,13 +38,15 @@ public class MeasurementController {
     }
 
     @PostMapping
-    public ResponseEntity<MeasurementResponse> createMeasurement(@RequestBody @Valid final MeasurementRequest measurementRequest) {
-        return new CreateMeasurementResponseProvider().doResponse(measurementService.createMeasurement(measurementRequest));
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<MeasurementResponse> createMeasurement(@RequestBody @Valid final MeasurementRequest measurementRequest, final Principal principal) {
+        return new CreateMeasurementResponseProvider().doResponse(measurementService.createMeasurement(measurementRequest, principal));
     }
 
     @PostMapping(value = "/{internalMeasurementId}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<MeasurementResponse> updateMeasurement(@PathVariable final String internalMeasurementId,
-                                                                 @RequestBody @Valid final MeasurementRequest measurementRequest) {
-        return new CreateMeasurementResponseProvider().doResponse(measurementService.updateMeasurement(internalMeasurementId, measurementRequest));
+                                                                 @RequestBody @Valid final MeasurementRequest measurementRequest, final Principal principal) {
+        return new CreateMeasurementResponseProvider().doResponse(measurementService.updateMeasurement(internalMeasurementId, measurementRequest, principal));
     }
 }

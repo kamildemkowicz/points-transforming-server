@@ -6,15 +6,14 @@ import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import points.transforming.app.server.exceptions.MeasurementNotFoundException;
+import points.transforming.app.server.exceptions.user.RoleNotFoundException;
+import points.transforming.app.server.exceptions.user.UserAlreadyExistsException;
 import points.transforming.app.server.models.user.Role;
 import points.transforming.app.server.models.user.RoleName;
 import points.transforming.app.server.models.user.User;
 import points.transforming.app.server.models.user.api.CreateUserRequest;
 import points.transforming.app.server.repositories.RoleRepository;
 import points.transforming.app.server.repositories.UserRepository;
-
-import static points.transforming.app.server.services.user.UserService.Error.GEODETIC_OBJECT_DOES_NOT_EXIST_PTS401;
 
 @Service
 @AllArgsConstructor
@@ -24,12 +23,12 @@ public class UserService {
     private final PasswordEncoder encoder;
 
     public void createUser(final CreateUserRequest createUserRequest) {
-        if (userRepository.existsByUsername(createUserRequest.getUsername())) {
-            throw new MeasurementNotFoundException(GEODETIC_OBJECT_DOES_NOT_EXIST_PTS401);
+        if (Boolean.TRUE.equals(userRepository.existsByUsername(createUserRequest.getUsername()))) {
+            throw new UserAlreadyExistsException(Error.USER_WITH_PROVIDED_USERNAME_ALREADY_EXIST_PTS501);
         }
 
-        if (userRepository.existsByEmail(createUserRequest.getEmail())) {
-            throw new MeasurementNotFoundException(GEODETIC_OBJECT_DOES_NOT_EXIST_PTS401);
+        if (Boolean.TRUE.equals(userRepository.existsByEmail(createUserRequest.getEmail()))) {
+            throw new UserAlreadyExistsException(Error.USER_WITH_PROVIDED_EMAIL_ALREADY_EXIST_PTS502);
         }
 
         final var user = new User(createUserRequest.getFirstName(), createUserRequest.getLastName(), createUserRequest.getUsername(),
@@ -39,23 +38,14 @@ public class UserService {
         Set<Role> roles = new HashSet<>();
 
         strRoles.forEach(role -> {
-            switch (role) {
-                case "admin":
-                    final Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN)
-                        .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
-                    roles.add(adminRole);
-
-                    break;
-                case "pm":
-                    final Role pmRole = roleRepository.findByName(RoleName.ROLE_PM)
-                        .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
-                    roles.add(pmRole);
-
-                    break;
-                default:
-                    final Role userRole = roleRepository.findByName(RoleName.ROLE_USER)
-                        .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
-                    roles.add(userRole);
+            if ("admin".equals(role)) {
+                final Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN)
+                    .orElseThrow(() -> new RoleNotFoundException(Error.GIVEN_ROLE_DOES_NOT_EXIST_PTS503));
+                roles.add(adminRole);
+            } else {
+                final Role userRole = roleRepository.findByName(RoleName.ROLE_USER)
+                    .orElseThrow(() -> new RoleNotFoundException(Error.GIVEN_ROLE_DOES_NOT_EXIST_PTS503));
+                roles.add(userRole);
             }
         });
 
@@ -64,6 +54,6 @@ public class UserService {
     }
 
     enum Error {
-        GEODETIC_OBJECT_DOES_NOT_EXIST_PTS401
+        USER_WITH_PROVIDED_USERNAME_ALREADY_EXIST_PTS501, USER_WITH_PROVIDED_EMAIL_ALREADY_EXIST_PTS502, GIVEN_ROLE_DOES_NOT_EXIST_PTS503
     }
 }
