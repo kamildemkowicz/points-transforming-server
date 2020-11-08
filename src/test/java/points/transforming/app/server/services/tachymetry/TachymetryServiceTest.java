@@ -1,6 +1,7 @@
 package points.transforming.app.server.services.tachymetry;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
@@ -54,10 +55,11 @@ public class TachymetryServiceTest {
         doThrow(new MeasurementNotFoundException(Error.MEASUREMENT_DOES_NOT_EXIST_PTS100)).when(measurementService).getMeasurement(anyString());
 
         final var tachymetryRequestMock = Mockito.mock(TachymetryRequest.class);
+        final var principalMock = Mockito.mock(Principal.class);
         when(tachymetryRequestMock.getInternalMeasurementId()).thenReturn("notExist");
 
         // when then
-        assertThatThrownBy(() -> tachymetryService.calculateTachymetry(tachymetryRequestMock))
+        assertThatThrownBy(() -> tachymetryService.calculateTachymetry(tachymetryRequestMock, principalMock))
             .isInstanceOf(MeasurementNotFoundException.class)
             .hasFieldOrPropertyWithValue("measurementId", "notExist");
     }
@@ -68,6 +70,7 @@ public class TachymetryServiceTest {
         final var measurement = testMeasurementServiceFactory.createValidMeasurement();
         final var tachymetryRequest = testTachymetryServiceFactory.createInvalidTachymetryRequest();
         final var coordinateConverterMock = Mockito.mock(ConvertedCoordinates.class);
+        final var principalMock = Mockito.mock(Principal.class);
         when(coordinateConverterMock.getCoordinateX()).thenReturn(BigDecimal.valueOf(49.93956789022778));
         when(coordinateConverterMock.getCoordinateY()).thenReturn(BigDecimal.valueOf(19.012730260613353));
 
@@ -76,7 +79,7 @@ public class TachymetryServiceTest {
         when(coordinatesConversionService.convertCoordinateFromGeocentricToWgs84(any(Picket.class), anyInt())).thenReturn(coordinateConverterMock);
 
         // when then
-        assertThatThrownBy(() -> tachymetryService.calculateTachymetry(tachymetryRequest))
+        assertThatThrownBy(() -> tachymetryService.calculateTachymetry(tachymetryRequest, principalMock))
             .isInstanceOf(ControlNetworkPointsException.class)
             .hasFieldOrPropertyWithValue("startingPointName", "name10")
             .hasFieldOrPropertyWithValue("endPointName", "name10");
@@ -88,6 +91,8 @@ public class TachymetryServiceTest {
         final var measurement = testMeasurementServiceFactory.createValidMeasurement();
         final var tachymetryRequest = testTachymetryServiceFactory.createValidTachymetryRequest();
         final var coordinateConverterMock = Mockito.mock(ConvertedCoordinates.class);
+        final var principalMock = Mockito.mock(Principal.class);
+
         when(coordinateConverterMock.getCoordinateX()).thenReturn(BigDecimal.valueOf(49.93956789022778));
         when(coordinateConverterMock.getCoordinateY()).thenReturn(BigDecimal.valueOf(19.012730260613353));
 
@@ -96,7 +101,7 @@ public class TachymetryServiceTest {
         when(coordinatesConversionService.convertCoordinateFromGeocentricToWgs84(any(Picket.class), anyInt())).thenReturn(coordinateConverterMock);
 
         // when
-        final var result = tachymetryService.calculateTachymetry(tachymetryRequest);
+        final var result = tachymetryService.calculateTachymetry(tachymetryRequest, principalMock);
 
         // then
         assertThat(result.get(0).getStationName()).isEqualTo("Station 1");

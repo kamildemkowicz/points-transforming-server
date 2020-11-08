@@ -18,4 +18,9 @@ public class TachymetryUtils {
     public static BigDecimal calculateFromRadianToDegrees(final double angleInRad) {
         return BigDecimal.valueOf(angleInRad).multiply(BigDecimal.valueOf(FULL_ANGLE)).divide(BigDecimal.valueOf(2 * Math.PI), 20, RoundingMode.HALF_UP);
     }
+
+    public static BigDecimal calculateFromDegreesToRadian(final double angleInDegrees) {
+        return BigDecimal.valueOf(angleInDegrees).multiply(BigDecimal.valueOf(2 * Math.PI)).divide(BigDecimal.valueOf(FULL_ANGLE), 20,
+            RoundingMode.HALF_UP);
+    }
 }

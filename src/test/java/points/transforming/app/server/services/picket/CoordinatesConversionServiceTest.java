@@ -28,4 +28,20 @@ public class CoordinatesConversionServiceTest {
         assertThat(result.getCoordinateX().doubleValue()).isEqualTo(49.93956789022778);
         assertThat(result.getCoordinateY().doubleValue()).isEqualTo(19.012730260613353);
     }
+
+    @Test
+    public void shouldCalculateCoordinateFromWgs84ToGeocentricCorrectly() {
+        // given
+        var picket1 = new Picket();
+        picket1.setName("picket1");
+        picket1.setLatitude(50.31040135858681);
+        picket1.setLongitude(18.888575546891655);
+        picket1.setPicketInternalId("PIC-1");
+
+        // when
+        final var result = coordinatesConversionService.convertCoordinateFromWgs84ToGeocentric(picket1, 6);
+
+        assertThat(result.getCoordinateX().doubleValue()).isEqualTo(5575321.99);
+        assertThat(result.getCoordinateY().doubleValue()).isEqualTo(6563290.64);
+    }
 }

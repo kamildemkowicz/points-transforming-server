@@ -33,8 +33,8 @@ public class MeasurementController {
 
     @GetMapping(value = "/{measurementInternalId}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<MeasurementResponse> getMeasurement(@PathVariable final String measurementInternalId) {
-        return new MeasurementResponseProvider().doResponse(measurementService.getMeasurement(measurementInternalId));
+    public ResponseEntity<MeasurementResponse> getMeasurement(@PathVariable final String measurementInternalId, final Principal principal) {
+        return new MeasurementResponseProvider().doResponse(measurementService.getMeasurement(measurementInternalId, principal));
     }
 
     @PostMapping

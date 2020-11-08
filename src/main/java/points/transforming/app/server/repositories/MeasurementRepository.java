@@ -17,6 +17,8 @@ public interface MeasurementRepository extends JpaRepository<Measurement, Intege
 
     Optional<Measurement> findByMeasurementInternalIdAndEndDate(String id, LocalDateTime endDate);
 
+    Optional<Measurement> findByMeasurementInternalIdAndEndDateAndUser(String id, LocalDateTime endDate, User user);
+
     Measurement save(Measurement measurement);
 
     @Query("select distinct m from Measurement m left join fetch m.pickets WHERE m.user=:user AND m.endDate=null ORDER BY m.creationDate DESC")

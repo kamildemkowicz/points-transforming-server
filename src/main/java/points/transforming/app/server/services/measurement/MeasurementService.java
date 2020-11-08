@@ -38,11 +38,21 @@ public class MeasurementService {
                 .collect(Collectors.toList());
     }
 
+    public Measurement getMeasurement(final String measurementInternalId, final Principal principal) {
+        final var user = userRepository.findByUsername(principal.getName())
+            .orElseThrow(() -> new MeasurementNotFoundException(Error.USER_DOES_NOT_EXIST_PTS500));
+
+        return this.measurementRepository
+            .findByMeasurementInternalIdAndEndDateAndUser(measurementInternalId, null, user)
+            .orElseThrow(() -> new MeasurementNotFoundException(Error.MEASUREMENT_DOES_NOT_EXIST_PTS100));
+    }
+
     public Measurement getMeasurement(final String measurementInternalId) {
         return this.measurementRepository
             .findByMeasurementInternalIdAndEndDate(measurementInternalId, null)
             .orElseThrow(() -> new MeasurementNotFoundException(Error.MEASUREMENT_DOES_NOT_EXIST_PTS100));
     }
+
 
     @Transactional
     public Measurement createMeasurement(final MeasurementRequest measurementRequest, final Principal principal) {
@@ -69,7 +79,7 @@ public class MeasurementService {
         final var user = userRepository.findByUsername(principal.getName())
             .orElseThrow(() -> new MeasurementNotFoundException(Error.USER_DOES_NOT_EXIST_PTS500));
 
-        final Measurement oldMeasurement = getMeasurement(internalMeasurementId);
+        final Measurement oldMeasurement = getMeasurement(internalMeasurementId, principal);
         final Measurement measurement = MeasurementMapper.toMeasurementFrom(measurementRequest);
 
         measurement.setUser(user);
@@ -79,6 +89,7 @@ public class MeasurementService {
 
         picketService.setInternalIdsForNewPickets(measurement.getPickets());
         picketService.calculateCoordinatesToWgs84(measurement);
+        picketService.calculateCoordinatesTo2000(measurement);
 
         final Measurement newMeasurementCreated = this.measurementRepository.save(measurement);
         oldMeasurement.setEndDate(newMeasurementCreated.getCreationDate());

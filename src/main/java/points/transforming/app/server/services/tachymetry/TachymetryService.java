@@ -2,6 +2,7 @@ package points.transforming.app.server.services.tachymetry;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,10 +40,10 @@ public class TachymetryService {
     private final CoordinatesConversionService coordinatesConversionService;
 
     @Transactional
-    public List<MeasuringStationReportDto> calculateTachymetry(final TachymetryRequest tachymetryRequest) {
+    public List<MeasuringStationReportDto> calculateTachymetry(final TachymetryRequest tachymetryRequest, final Principal principal) {
         final var calculatedMeasuringStationsDto = new ArrayList<MeasuringStationReportDto>();
         final var calculatedMeasuringStations = new ArrayList<MeasuringStation>();
-        final var measurement = measurementService.getMeasurement(tachymetryRequest.getInternalMeasurementId());
+        final var measurement = measurementService.getMeasurement(tachymetryRequest.getInternalMeasurementId(), principal);
 
         final var highestPicketInternalId = picketService.getHighestInternalId();
         final var tachymetry = TachymetryMappers.toTachymetry(measurement, tachymetryRequest.getTachymetryMetaData());
@@ -58,8 +59,8 @@ public class TachymetryService {
         return calculatedMeasuringStationsDto;
     }
 
-    public List<TachymetryDto> getTachymetries(final String measurementInternalId) {
-        measurementService.getMeasurement(measurementInternalId);
+    public List<TachymetryDto> getTachymetries(final String measurementInternalId, final Principal principal) {
+        measurementService.getMeasurement(measurementInternalId, principal);
         final var tachymetries = tachymetryRepository.findAllByMeasurementInternalId(measurementInternalId);
         return tachymetries.stream()
             .map(this::createTachymetryDto)

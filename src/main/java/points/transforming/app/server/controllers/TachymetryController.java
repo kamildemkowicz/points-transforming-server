@@ -2,6 +2,7 @@ package points.transforming.app.server.controllers;
 
 import javax.validation.Valid;
 
+import java.security.Principal;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -22,17 +23,18 @@ public class TachymetryController {
 
     @PostMapping
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<TachymetryReportResponse> calculateTachymetry(@RequestBody @Valid final TachymetryRequest tachymetryRequest) {
+    public ResponseEntity<TachymetryReportResponse> calculateTachymetry(@RequestBody @Valid final TachymetryRequest tachymetryRequest,
+                                                                        final Principal principal) {
         return new TachymetryResponseProvider().doResponse(
             tachymetryRequest.getInternalMeasurementId(),
-            tachymetryService.calculateTachymetry(tachymetryRequest),
+            tachymetryService.calculateTachymetry(tachymetryRequest, principal),
             tachymetryRequest.getTachymetryMetaData()
         );
     }
 
     @GetMapping(value = "/{measurementInternalId}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<List<TachymetryReportResponse>> getAllMeasurements(@PathVariable final String measurementInternalId) {
-        return new TachymetryResponseProvider().doResponse(tachymetryService.getTachymetries(measurementInternalId));
+    public ResponseEntity<List<TachymetryReportResponse>> getAllMeasurements(@PathVariable final String measurementInternalId, final Principal principal) {
+        return new TachymetryResponseProvider().doResponse(tachymetryService.getTachymetries(measurementInternalId, principal));
     }
 }

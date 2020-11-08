@@ -52,4 +52,15 @@ public class PicketService {
             }
         });
     }
+
+    public void calculateCoordinatesTo2000(final Measurement measurement) {
+        measurement.getPickets().forEach(picket -> {
+            if (Objects.isNull(picket.getCoordinateX2000()) && Objects.isNull(picket.getCoordinateY2000()) && Objects.nonNull(picket.getLatitude())
+                && Objects.nonNull(picket.getLongitude())) {
+                final var wgs84Coordinates = coordinatesConversionService.convertCoordinateFromWgs84ToGeocentric(picket, measurement.getDistrict().getZone());
+                picket.setCoordinateX2000(wgs84Coordinates.getCoordinateX().doubleValue());
+                picket.setCoordinateY2000(wgs84Coordinates.getCoordinateY().doubleValue());
+            }
+        });
+    }
 }
